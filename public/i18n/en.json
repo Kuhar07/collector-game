@@ -1,0 +1,123 @@
+{
+  "app_title": "Sakupljač",
+  "tabs": {
+    "offline": "Offline",
+    "online": "Online",
+    "leaderboard": "Leaderboard"
+  },
+  "header": {
+    "dropdown": "Menu",
+    "sign_out": "Sign out"
+  },
+  "menu": {
+    "new_game": "New Game",
+    "online_game": "Online Game",
+    "leaderboard": "Leaderboard",
+    "reset_game": "Reset Game",
+    "main_menu": "Main Menu",
+    "theme_light": "Light mode",
+    "theme_dark": "Dark mode",
+    "language_en": "English",
+    "language_hr": "Hrvatski"
+  },
+  "auth": {
+    "title": "Sign In",
+    "message": "Sign in for online play.",
+    "sign_in_google": "Sign in with Google",
+    "cancel": "Cancel",
+    "opening_browser": "Opening browser for sign-in...",
+    "success": "Sign in successful!"
+  },
+  "lobby": {
+    "sign_out": "Sign out",
+    "create_casual": "Casual Game",
+    "create_ranked": "Ranked Game",
+    "join_game": "Join Game",
+    "online_leaderboard": "Leaderboard",
+    "back": "Back",
+    "game_options": "Create Game",
+    "casual_mode": "Casual Mode - Select Options",
+    "ranked_mode": "Ranked Mode - 8×8 Board with 30s Timer",
+    "grid_size": "Board Size",
+    "timer_label": "Play with timer (30s per move)",
+    "create_button": "Create Room",
+    "cancel_button": "Cancel",
+    "waiting_room": "Waiting for opponent... Room code:",
+    "join_room": "Join Room",
+    "room_code": "Room Code",
+    "room_code_input_placeholder": "Enter code",
+    "join_button": "Join"
+  },
+  "game": {
+    "new_game_dialog": "New Game",
+    "player1_name": "Player 1 Name",
+    "player1_placeholder": "Player 1",
+    "player2_name": "Player 2 Name",
+    "player2_placeholder": "Player 2",
+    "grid_size_label": "Board Size",
+    "timer_label": "Play with timer (30s per move)",
+    "start_button": "Start Game",
+    "cancel_button": "Cancel",
+    "game_over_title": "Game Over!",
+    "game_over_draw": "It's a Draw!",
+    "game_over_winner": "{player} wins!",
+    "new_game_button": "New Game",
+    "main_menu_button": "Main Menu",
+    "reset_game": "Reset Game",
+    "confirm_reset_title": "Reset Game",
+    "confirm_reset_message": "Are you sure you want to reset the game?",
+    "yes_button": "Yes",
+    "no_button": "No",
+    "reset_button": "Reset Game",
+    "back_to_menu_button": "Main Menu",
+    "phase_place": "{player} - Place a dot",
+    "phase_eliminate": "{player} - Eliminate a field",
+    "invalid_placement": "Invalid placement! You must place next to an existing tile or on an empty field.",
+    "must_eliminate_adjacent": "You must eliminate an adjacent cell!",
+    "enter_both_names": "Please enter both player names!",
+    "timeout_loss": "{player} lost due to inactivity (3 missed turns)!",
+    "rating_change": "Rating: {p1} {d1} ({r1}), {p2} {d2} ({r2})."
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "close_button": "Close",
+    "rank": "#",
+    "player": "Player",
+    "rating": "Rating",
+    "wdl": "W / D / L",
+    "empty_local": "No saved players.",
+    "empty_online": "No online players yet.",
+    "local_section": "Local",
+    "online_section": "Online",
+    "loading": "Loading..."
+  },
+  "rules": {
+    "title": "Rules",
+    "description": "The story is simple, monkey.",
+    "close_button": "Close"
+  },
+  "menu_bar": {
+    "file": "File",
+    "new_game": "New Game",
+    "quit": "Quit",
+    "game": "Game",
+    "reset_game": "Reset Game",
+    "main_menu": "Main Menu",
+    "help": "Help",
+    "rules": "Rules"
+  },
+  "notifications": {
+    "online_error": "Error connecting to online game",
+    "timeout": "Connection timeout. Please try again.",
+    "opponent_left": "Opponent has left the game",
+    "invalid_move": "Invalid move",
+    "waiting_for_opponent": "Waiting for opponent...",
+    "your_turn": "Your turn",
+    "opponent_turn": "Opponent's turn",
+    "time_remaining": "Time remaining: {seconds}s",
+    "player_timeout": "Player timed out",
+    "ok_button": "OK",
+    "room_not_found": "Room not found or game has already started.",
+    "enter_code": "Enter a room code!"
+  }
+}

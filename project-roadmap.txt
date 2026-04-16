@@ -1,0 +1,2 @@
+Transform this electron app to a Ionic React PWA app with vite. Replace the tool bar with a drop down menu and add all of the toolbars functions to it. Now for the options that are buttons in electron like at the start we can choose online or offline make those into seperate tabs in react ( the tabs will be at the footer ). Icons for language change and light/dark mode should be put in the header as well as in the drop down menu ( the drop down menu is also in the header and also use ionics icons for everything).
+Using JavaScript.

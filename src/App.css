@@ -1,0 +1,284 @@
+/* App-level styles — menus, logos, game board, dialogs. */
+
+.sk-logo {
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: linear-gradient(45deg, #dc3545, #007bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  letter-spacing: 3px;
+  text-align: center;
+  margin: 20px 0 28px 0;
+}
+
+.sk-menu-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+.sk-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.sk-menu-btn {
+  --background: var(--sk-cell-bg);
+  --color: var(--sk-text);
+  --border-color: var(--sk-cell-border);
+  --border-radius: 10px;
+  --border-width: 1.5px;
+  --border-style: solid;
+  width: 100%;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  height: 48px;
+}
+
+.sk-menu-btn::part(native) {
+  transition: background 0.18s, transform 0.13s;
+}
+
+.sk-menu-btn:hover {
+  --background: linear-gradient(90deg, #dc3545, #007bff);
+  --color: #fff;
+  --border-color: transparent;
+}
+
+.sk-user-bar {
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: var(--sk-user-bar-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sk-lobby-panel {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--sk-cell-border);
+  border-radius: 10px;
+  background: var(--sk-dialog-bg);
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+}
+
+.sk-lobby-panel label {
+  display: block;
+  font-size: 0.88rem;
+  margin-bottom: 5px;
+}
+
+.sk-input {
+  --background: var(--sk-bg);
+  --color: var(--sk-text);
+  border: 1px solid var(--sk-cell-border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 4px 10px;
+}
+
+.sk-row-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.sk-room-code {
+  letter-spacing: 6px;
+  font-size: 2.2rem;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+/* Game board */
+.sk-game-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 14px 0;
+  flex-wrap: wrap;
+}
+
+.sk-player-info {
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  min-width: 130px;
+}
+
+.sk-player-info.active {
+  border-color: var(--sk-cell-border);
+  background: var(--sk-dialog-bg);
+}
+
+.sk-player-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.sk-player-score {
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sk-status {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 6px 14px;
+  min-width: 140px;
+}
+
+.sk-turn-timer {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--sk-timer-color);
+}
+
+.sk-turn-timer.warning {
+  color: #dc3545;
+}
+
+.sk-grid-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  position: relative;
+}
+
+.sk-grid {
+  display: grid;
+  background: var(--sk-grid-bg);
+  position: relative;
+  max-width: 100%;
+}
+
+.sk-cell {
+  outline: 1px solid var(--sk-cell-border);
+  background-color: var(--sk-cell-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.sk-cell.eliminated {
+  background-color: var(--sk-eliminated-bg);
+}
+
+.sk-dot {
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+}
+
+.sk-connections-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sk-game-controls {
+  text-align: center;
+  margin: 16px 0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Leaderboard */
+.sk-leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+}
+
+.sk-leaderboard-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--sk-user-bar-color);
+  font-weight: 600;
+  border-bottom: 2px solid var(--sk-cell-border);
+}
+
+.sk-leaderboard-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--sk-cell-border);
+}
+
+.sk-leaderboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sk-rank-cell { font-weight: 700; width: 32px; color: var(--sk-user-bar-color); }
+.sk-top-1 .sk-rank-cell { color: #f5a623; }
+.sk-top-2 .sk-rank-cell { color: #9b9b9b; }
+.sk-top-3 .sk-rank-cell { color: #c47d3e; }
+.sk-name-cell { font-weight: 600; }
+.sk-rating-cell { font-weight: 700; color: #007bff; }
+.sk-wdl-cell { color: var(--sk-user-bar-color); font-size: 0.88rem; }
+
+/* Background canvas — sits behind everything */
+.sk-bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Let Ionic tab content show through the canvas */
+ion-content {
+  --background: transparent;
+}
+
+/* Header tweaks */
+.sk-header-title {
+  background: linear-gradient(45deg, #dc3545, #007bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.sk-tab-section {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}

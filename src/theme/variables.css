@@ -1,0 +1,58 @@
+/* Sakupljač theme — maps legacy CSS vars onto Ionic tokens. */
+
+:root {
+  --dot-size: 30px;
+  --sk-bg: #ffffff;
+  --sk-text: #000000;
+  --sk-menu-bg: #ffffff;
+  --sk-grid-bg: #000000;
+  --sk-cell-bg: #ffffff;
+  --sk-cell-border: #000000;
+  --sk-eliminated-bg: gray;
+  --sk-dialog-overlay: rgba(0, 0, 0, 0.5);
+  --sk-dialog-bg: #ffffff;
+  --sk-timer-color: #333333;
+  --sk-user-bar-color: #555555;
+  --sk-p1-color: #dc3545;
+  --sk-p2-color: #007bff;
+
+  /* Ionic overrides (light) */
+  --ion-background-color: var(--sk-bg);
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: var(--sk-text);
+  --ion-text-color-rgb: 0, 0, 0;
+  --ion-color-primary: #007bff;
+  --ion-color-primary-rgb: 0, 123, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #006ee0;
+  --ion-color-primary-tint: #1a89ff;
+  --ion-color-danger: #dc3545;
+  --ion-color-danger-rgb: 220, 53, 69;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-shade: #c12e3d;
+  --ion-color-danger-tint: #e04958;
+}
+
+body.dark {
+  --sk-bg: #121212;
+  --sk-text: #e0e0e0;
+  --sk-menu-bg: #121212;
+  --sk-grid-bg: #2c2c2c;
+  --sk-cell-bg: #1e1e1e;
+  --sk-cell-border: #444444;
+  --sk-eliminated-bg: #4a4a4a;
+  --sk-dialog-overlay: rgba(0, 0, 0, 0.8);
+  --sk-dialog-bg: #1e1e1e;
+  --sk-timer-color: #e0e0e0;
+  --sk-user-bar-color: #aaaaaa;
+  --sk-p1-color: #ff6b7a;
+  --sk-p2-color: #4da6ff;
+
+  --ion-background-color: var(--sk-bg);
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color: var(--sk-text);
+  --ion-text-color-rgb: 224, 224, 224;
+  --ion-toolbar-background: #1e1e1e;
+  --ion-tab-bar-background: #1e1e1e;
+  --ion-item-background: transparent;
+}

@@ -1,0 +1,123 @@
+{
+  "app_title": "Sakupljač",
+  "tabs": {
+    "offline": "Offline",
+    "online": "Online",
+    "leaderboard": "Ljestvica"
+  },
+  "header": {
+    "dropdown": "Izbornik",
+    "sign_out": "Odjava"
+  },
+  "menu": {
+    "new_game": "Nova Igra",
+    "online_game": "Online Igra",
+    "leaderboard": "Ljestvica",
+    "reset_game": "Resetiraj Igru",
+    "main_menu": "Glavni Izbornik",
+    "theme_light": "Svijetli mod",
+    "theme_dark": "Tamni mod",
+    "language_en": "English",
+    "language_hr": "Hrvatski"
+  },
+  "auth": {
+    "title": "Prijava",
+    "message": "Prijavite se za online igru.",
+    "sign_in_google": "Prijavi se s Google računom",
+    "cancel": "Odustani",
+    "opening_browser": "Otvaranje preglednika za prijavu...",
+    "success": "Prijava uspješna!"
+  },
+  "lobby": {
+    "sign_out": "Odjava",
+    "create_casual": "Casual Igra",
+    "create_ranked": "Ranked Igra",
+    "join_game": "Pridruži se",
+    "online_leaderboard": "Ljestvica",
+    "back": "Natrag",
+    "game_options": "Postavke Igre",
+    "casual_mode": "Casual Igra - Opcije",
+    "ranked_mode": "Ranked Igra - 8×8 Ploča, 30s Potez",
+    "grid_size": "Veličina ploče",
+    "timer_label": "Igra s mjeračem vremena (30s po potezu)",
+    "create_button": "Stvori sobu",
+    "cancel_button": "Odustani",
+    "waiting_room": "Čekanje protivnika... Kod sobe:",
+    "join_room": "Pridruži se sobi",
+    "room_code": "Kod sobe",
+    "room_code_input_placeholder": "Unesite kod",
+    "join_button": "Pridruži se"
+  },
+  "game": {
+    "new_game_dialog": "Nova Igra",
+    "player1_name": "Ime 1. igrača",
+    "player1_placeholder": "Igrač 1",
+    "player2_name": "Ime 2. igrača",
+    "player2_placeholder": "Igrač 2",
+    "grid_size_label": "Veličina ploče",
+    "timer_label": "Igra s mjeračem vremena (30s po potezu)",
+    "start_button": "Započni Igru",
+    "cancel_button": "Odustani",
+    "game_over_title": "Kraj Igre!",
+    "game_over_draw": "Neriješeno!",
+    "game_over_winner": "Pobjednik: {player}!",
+    "new_game_button": "Nova Igra",
+    "main_menu_button": "Glavni Izbornik",
+    "reset_game": "Resetiraj Igru",
+    "confirm_reset_title": "Resetiraj Igru",
+    "confirm_reset_message": "Jeste li sigurni da želite resetirati igru?",
+    "yes_button": "Da",
+    "no_button": "Ne",
+    "reset_button": "Resetiraj Igru",
+    "back_to_menu_button": "Glavni Izbornik",
+    "phase_place": "{player} - Postavi točku",
+    "phase_eliminate": "{player} - Osjenčaj polje",
+    "invalid_placement": "Nevaljano postavljanje! Morate postaviti pokraj postojeće pločice ili na prazno polje.",
+    "must_eliminate_adjacent": "Morate osjenčati susjednu ćeliju!",
+    "enter_both_names": "Molimo unesite oba imena igrača!",
+    "timeout_loss": "{player} je izgubio zbog neaktivnosti (3 propuštena poteza)!",
+    "rating_change": "Rejting: {p1} {d1} ({r1}), {p2} {d2} ({r2})."
+  },
+  "leaderboard": {
+    "title": "Ljestvica",
+    "close_button": "Zatvori",
+    "rank": "#",
+    "player": "Igrač",
+    "rating": "Rejting",
+    "wdl": "W / N / P",
+    "empty_local": "Nema spremljenih igrača.",
+    "empty_online": "Još nema online igrača.",
+    "local_section": "Lokalno",
+    "online_section": "Online",
+    "loading": "Učitavanje..."
+  },
+  "rules": {
+    "title": "Pravila",
+    "description": "Priča je jednostavna, majmune.",
+    "close_button": "Zatvori"
+  },
+  "menu_bar": {
+    "file": "Datoteka",
+    "new_game": "Nova Igra",
+    "quit": "Izađi",
+    "game": "Igra",
+    "reset_game": "Resetiraj Igru",
+    "main_menu": "Glavni Izbornik",
+    "help": "Pomoć",
+    "rules": "Pravila"
+  },
+  "notifications": {
+    "online_error": "Greška pri spajanju na online igru",
+    "timeout": "Veza je istekla. Pokušajte ponovo.",
+    "opponent_left": "Protivnik je napustio igru",
+    "invalid_move": "Nevaljano postavljanje",
+    "waiting_for_opponent": "Čekanje protivnika...",
+    "your_turn": "Tvoj potez",
+    "opponent_turn": "Potez protivnika",
+    "time_remaining": "Preostalo vrijeme: {seconds}s",
+    "player_timeout": "Isteklo vrijeme igrača",
+    "ok_button": "U redu",
+    "room_not_found": "Soba nije pronađena ili je igra već počela.",
+    "enter_code": "Unesite kod sobe!"
+  }
+}
