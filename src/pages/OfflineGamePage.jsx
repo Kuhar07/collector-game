@@ -156,10 +156,11 @@ export default function OfflineGamePage() {
         />
 
         <IonAlert
+          cssClass="sk-alert-pre"
           isOpen={!!result}
           backdropDismiss={false}
           header={t('game.game_over_title')}
-          message={buildGameOverMessage().replace(/\n/g, '<br/>')}
+          message={buildGameOverMessage()}
           buttons={[
             {
               text: t('game.new_game_button'),

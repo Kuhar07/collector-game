@@ -194,10 +194,11 @@ export default function OnlineGamePage() {
         />
 
         <IonAlert
+          cssClass="sk-alert-pre"
           isOpen={!!finalResult}
           backdropDismiss={false}
           header={t('game.game_over_title')}
-          message={message.replace(/\n/g, '<br/>')}
+          message={message}
           buttons={[
             {
               text: t('game.main_menu_button'),
