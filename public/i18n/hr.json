@@ -84,7 +84,7 @@
     "rank": "#",
     "player": "Igrač",
     "rating": "Rejting",
-    "wdl": "W / N / P",
+    "wdl": "P / N / G",
     "empty_local": "Nema spremljenih igrača.",
     "empty_online": "Još nema online igrača.",
     "local_section": "Lokalno",
