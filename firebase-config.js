@@ -1,14 +1,12 @@
-// Prevent Firebase from detecting Electron's renderer as a Node.js environment.
-delete window.module;
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+  initializeFirestore,
+  persistentLocalCache
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyARc_n26JuSHaY7uKaXbV4uLJ9mZcs7wX4",
   authDomain: "niop4g-sakupljac-78896.firebaseapp.com",
