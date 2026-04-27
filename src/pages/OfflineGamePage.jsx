@@ -17,7 +17,7 @@ import { formatDelta } from '../game/gameEngine';
 import { useState } from 'react';
 
 export default function OfflineGamePage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const history = useHistory();
   const {
     config,
@@ -48,6 +48,9 @@ export default function OfflineGamePage() {
   });
 
   if (!config) return null;
+
+  const resetButtonLabel = lang === 'hr' ? 'Resetiraj' : t('game.reset_button');
+  const menuButtonLabel = lang === 'hr' ? 'Izbornik' : t('game.back_to_menu_button');
 
   const name = currentPlayer === 1 ? config.player1Name : config.player2Name;
   const statusText =
@@ -95,8 +98,8 @@ export default function OfflineGamePage() {
   return (
     <IonPage>
       <AppHeader />
-      <IonContent fullscreen>
-        <div className="sk-tab-section ion-padding-horizontal">
+      <IonContent fullscreen scrollY={false} className="sk-game-content">
+        <div className="sk-tab-section sk-game-stage ion-padding-horizontal">
           <div className="sk-game-header">
             <div className={`sk-player-info${currentPlayer === 1 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#dc3545' }}>
@@ -128,13 +131,13 @@ export default function OfflineGamePage() {
           />
 
           <div className="sk-game-controls">
-            <IonButton onClick={() => setConfirmResetOpen(true)} fill="outline">
+            <IonButton className="sk-game-btn sk-game-btn-reset" onClick={() => setConfirmResetOpen(true)} fill="solid">
               <IonIcon slot="start" icon={refreshOutline} />
-              {t('game.reset_button')}
+              {resetButtonLabel}
             </IonButton>
-            <IonButton onClick={handleMainMenu} fill="outline" color="medium">
+            <IonButton className="sk-game-btn sk-game-btn-menu" onClick={handleMainMenu} fill="solid">
               <IonIcon slot="start" icon={homeOutline} />
-              {t('game.back_to_menu_button')}
+              {menuButtonLabel}
             </IonButton>
           </div>
         </div>

@@ -140,9 +140,24 @@ function isDiag(r1, c1, r2, c2) {
   return Math.abs(r1 - r2) === 1 && Math.abs(c1 - c2) === 1;
 }
 
+/**
+ * Validate that a history entry is a valid [row, col] pair with integer coordinates.
+ */
+function isValidHistoryPoint(point) {
+  return (
+    Array.isArray(point) &&
+    point.length === 2 &&
+    Number.isInteger(point[0]) &&
+    Number.isInteger(point[1])
+  );
+}
+
 export function computeConnections(history) {
-  const n = history.length;
+  // Defensive: filter to valid points only, ignore corrupt/undefined entries
+  const validHistory = (history || []).filter(isValidHistoryPoint);
+  const n = validHistory.length;
   if (n < 2) return [];
+
   const uf = Array.from({ length: n }, (_, i) => i);
   const find = (x) => (uf[x] === x ? x : (uf[x] = find(uf[x])));
   const union = (a, b) => {
@@ -155,10 +170,10 @@ export function computeConnections(history) {
 
   const lines = [];
   for (let i = 1; i < n; i++) {
-    const [ri, ci] = history[i];
+    const [ri, ci] = validHistory[i];
     let found = false;
     for (let j = i - 1; j >= 0; j--) {
-      const [rj, cj] = history[j];
+      const [rj, cj] = validHistory[j];
       if (isOrtho(ri, ci, rj, cj)) {
         union(i, j);
         lines.push([i, j]);
@@ -168,7 +183,7 @@ export function computeConnections(history) {
     }
     if (!found) {
       for (let j = i - 1; j >= 0; j--) {
-        const [rj, cj] = history[j];
+        const [rj, cj] = validHistory[j];
         if (isDiag(ri, ci, rj, cj)) {
           union(i, j);
           lines.push([i, j]);
@@ -184,8 +199,8 @@ export function computeConnections(history) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         if (i === j || find(i) === find(j)) continue;
-        const [ri, ci] = history[i];
-        const [rj, cj] = history[j];
+        const [ri, ci] = validHistory[i];
+        const [rj, cj] = validHistory[j];
         if (isOrtho(ri, ci, rj, cj)) {
           union(i, j);
           lines.push([i, j]);
@@ -196,8 +211,8 @@ export function computeConnections(history) {
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         if (i === j || find(i) === find(j)) continue;
-        const [ri, ci] = history[i];
-        const [rj, cj] = history[j];
+        const [ri, ci] = validHistory[i];
+        const [rj, cj] = validHistory[j];
         if (isDiag(ri, ci, rj, cj)) {
           union(i, j);
           lines.push([i, j]);
@@ -213,7 +228,7 @@ export function computeConnections(history) {
     const key = Math.min(i, j) + ',' + Math.max(i, j);
     if (drawn.has(key)) continue;
     drawn.add(key);
-    out.push([history[i], history[j]]);
+    out.push([validHistory[i], validHistory[j]]);
   }
   return out;
 }

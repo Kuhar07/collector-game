@@ -17,7 +17,7 @@ import { useGameTimer } from '../hooks/useGameTimer';
 import { formatDelta } from '../game/gameEngine';
 
 export default function OnlineGamePage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -122,12 +122,13 @@ export default function OnlineGamePage() {
       : t('game.phase_eliminate', { player: currentName });
   const statusColor = data.currentPlayer === 1 ? '#dc3545' : '#007bff';
   const isRanked = data.mode === 'ranked';
+  const menuButtonLabel = lang === 'hr' ? 'Izbornik' : t('game.back_to_menu_button');
 
   return (
     <IonPage>
       <AppHeader title={t('app_title')} />
-      <IonContent fullscreen>
-        <div className="sk-tab-section ion-padding-horizontal">
+      <IonContent fullscreen scrollY={false} className="sk-game-content">
+        <div className="sk-tab-section sk-game-stage ion-padding-horizontal">
           <div className="sk-game-header">
             <div className={`sk-player-info${data.currentPlayer === 1 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#dc3545' }}>
@@ -164,12 +165,12 @@ export default function OnlineGamePage() {
 
           <div className="sk-game-controls">
             <IonButton
+              className="sk-game-btn sk-game-btn-menu"
               onClick={() => setLeaveOpen(true)}
-              fill="outline"
-              color="medium"
+              fill="solid"
             >
               <IonIcon slot="start" icon={homeOutline} />
-              {t('game.back_to_menu_button')}
+              {menuButtonLabel}
             </IonButton>
           </div>
         </div>

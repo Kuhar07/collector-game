@@ -3,6 +3,7 @@ import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirestoreGame } from './useFirestoreGame';
+import { normalizeHistory } from '../utils/coordinateNormalization';
 import {
   computeGameResult,
   getBiggestGroup,
@@ -14,10 +15,6 @@ import {
   ELO_K_FACTOR,
   LOCAL_MAX_TIMEOUTS
 } from '../game/gameEngine';
-
-function historyArrayToXY(arr) {
-  return (arr || []).map((p) => (Array.isArray(p) ? [p[0], p[1]] : [p.r, p.c]));
-}
 
 function historyXYToArray(arr) {
   return arr.map(([r, c]) => ({ r, c }));
@@ -58,8 +55,8 @@ export function useOnlineGame(gameId) {
   const history = useMemo(() => {
     if (!data || !data.placementHistory) return { 1: [], 2: [] };
     return {
-      1: historyArrayToXY(data.placementHistory.p1),
-      2: historyArrayToXY(data.placementHistory.p2)
+      1: normalizeHistory(data.placementHistory.p1),
+      2: normalizeHistory(data.placementHistory.p2)
     };
   }, [data]);
 
