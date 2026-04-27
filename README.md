@@ -24,7 +24,43 @@ npm run firebase:login
 npm run firebase:deploy
 ```
 
-This command builds the app and deploys `dist/` to Firebase Hosting.
+This command builds the app and deploys `dist/` to Firebase Hosting, plus Firestore rules/indexes.
+
+### Deploy only hosting (optional)
+
+```bash
+npm run firebase:deploy:hosting
+```
+
+### Deploy only Firestore config (optional)
+
+```bash
+npm run firebase:deploy:firestore
+```
+
+### Spark plan notes
+
+This repository is configured to work on Firebase Spark (free) without Cloud Functions.
+
+1. Matchmaking runs client-side using Firestore transactions.
+2. Ranked mode still uses matchmaking-only in the UI.
+3. Security is best-effort on Spark; server-authoritative anti-cheat requires Blaze + Functions.
+
+### Optional secure backend (Blaze required)
+
+Install Cloud Function dependencies once:
+
+```bash
+cd functions
+npm install
+cd ..
+```
+
+Deploy Functions:
+
+```bash
+npx firebase-tools deploy --only functions
+```
 
 ### Local hosting emulator (optional)
 

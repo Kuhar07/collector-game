@@ -43,6 +43,11 @@ export default function JoinRoomForm() {
         setError(t('notifications.room_not_found'));
         return;
       }
+      const gameData = snap.data();
+      if (gameData.mode !== 'casual' || gameData.source !== 'room') {
+        setError(t('notifications.room_not_found'));
+        return;
+      }
       await updateDoc(doc(db, 'games', gameId), {
         player2uid: user.uid,
         player2name: user.displayName || user.email,

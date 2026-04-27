@@ -46,7 +46,14 @@
     "join_room": "Join Room",
     "room_code": "Room Code",
     "room_code_input_placeholder": "Enter code",
-    "join_button": "Join"
+    "join_button": "Join",
+    "find_match": "Find Match",
+    "ranked_matchmaking_only": "Ranked uses matchmaking only. Room codes are disabled in ranked mode.",
+    "matchmaking_title": "Matchmaking",
+    "matchmaking_searching": "Searching for an opponent...",
+    "matchmaking_ranked": "Ranked queue",
+    "matchmaking_casual": "Casual queue",
+    "matchmaking_error": "Failed to start matchmaking. Please try again."
   },
   "game": {
     "new_game_dialog": "New Game",

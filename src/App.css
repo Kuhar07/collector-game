@@ -285,13 +285,37 @@
   border-bottom: none;
 }
 
-.sk-rank-cell { font-weight: 700; width: 32px; color: var(--sk-user-bar-color); }
-.sk-top-1 .sk-rank-cell { color: #f5a623; }
-.sk-top-2 .sk-rank-cell { color: #9b9b9b; }
-.sk-top-3 .sk-rank-cell { color: #c47d3e; }
-.sk-name-cell { font-weight: 600; }
-.sk-rating-cell { font-weight: 700; color: #007bff; }
-.sk-wdl-cell { color: var(--sk-user-bar-color); font-size: 0.88rem; }
+.sk-rank-cell {
+  font-weight: 700;
+  width: 32px;
+  color: var(--sk-user-bar-color);
+}
+
+.sk-top-1 .sk-rank-cell {
+  color: #f5a623;
+}
+
+.sk-top-2 .sk-rank-cell {
+  color: #9b9b9b;
+}
+
+.sk-top-3 .sk-rank-cell {
+  color: #c47d3e;
+}
+
+.sk-name-cell {
+  font-weight: 600;
+}
+
+.sk-rating-cell {
+  font-weight: 700;
+  color: #007bff;
+}
+
+.sk-wdl-cell {
+  color: var(--sk-user-bar-color);
+  font-size: 0.88rem;
+}
 
 /* Background canvas — sits behind everything */
 .sk-bg-canvas {

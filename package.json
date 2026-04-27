@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "firebase:login": "npx firebase-tools login",
-    "firebase:deploy": "npm run build && npx firebase-tools deploy --only hosting",
+    "firebase:deploy": "npm run build && npx firebase-tools deploy --only hosting,firestore:rules,firestore:indexes",
+    "firebase:deploy:hosting": "npm run build && npx firebase-tools deploy --only hosting",
+    "firebase:deploy:firestore": "npx firebase-tools deploy --only firestore:rules,firestore:indexes",
     "firebase:serve": "npm run build && npx firebase-tools emulators:start --only hosting"
   },
   "dependencies": {

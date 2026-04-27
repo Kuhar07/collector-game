@@ -86,7 +86,7 @@ export function useOnlineGame(gameId) {
           2: s2.data()?.rating ?? 1200
         });
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [data]);
 
   useEffect(() => {

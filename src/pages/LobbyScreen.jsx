@@ -17,7 +17,8 @@ import {
   enterOutline,
   trophySharp,
   arrowBackOutline,
-  addCircleOutline
+  addCircleOutline,
+  flashOutline
 } from 'ionicons/icons';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
@@ -48,10 +49,9 @@ export default function LobbyScreen() {
 
   if (!user) return null;
 
-  const handleCreate = async () => {
-    const isRanked = mode === 'ranked';
-    const size = isRanked ? 8 : gridSize;
-    const timerEnabled = isRanked ? true : timer;
+  const handleCreateCasualRoom = async () => {
+    const size = gridSize;
+    const timerEnabled = timer;
     const code = generateGameCode();
     const gameId = 'game_' + code;
 
@@ -60,7 +60,8 @@ export default function LobbyScreen() {
     try {
       await setDoc(doc(db, 'games', gameId), {
         gameCode: code,
-        mode,
+        mode: 'casual',
+        source: 'room',
         status: 'waiting',
         player1uid: user.uid,
         player1name: user.displayName || user.email,
@@ -83,6 +84,14 @@ export default function LobbyScreen() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleFindMatch = () => {
+    const params =
+      mode === 'casual'
+        ? `?gridSize=${gridSize}&timer=${timer ? 1 : 0}`
+        : '';
+    history.push(`/online/matchmaking/${mode}${params}`);
   };
 
   return (
@@ -115,14 +124,6 @@ export default function LobbyScreen() {
               <IonButton
                 className="sk-menu-btn"
                 expand="block"
-                onClick={() => history.push('/online/join')}
-              >
-                <IonIcon slot="start" icon={enterOutline} />
-                {t('lobby.join_game')}
-              </IonButton>
-              <IonButton
-                className="sk-menu-btn"
-                expand="block"
                 onClick={() => history.push('/leaderboard')}
               >
                 <IonIcon slot="start" icon={trophyOutline} />
@@ -139,43 +140,70 @@ export default function LobbyScreen() {
             </div>
           )}
 
-          {mode && (
+          {mode === 'casual' && (
             <div className="sk-lobby-panel">
               <div style={{ fontWeight: 700, marginBottom: 10, textAlign: 'center' }}>
-                {mode === 'casual' ? t('lobby.casual_mode') : t('lobby.ranked_mode')}
+                {t('lobby.casual_mode')}
               </div>
-              {mode === 'casual' && (
-                <>
-                  <IonItem>
-                    <IonLabel position="stacked">{t('lobby.grid_size')}</IonLabel>
-                    <IonSelect
-                      value={gridSize}
-                      onIonChange={(e) => setGridSize(Number(e.detail.value))}
-                    >
-                      {[4, 6, 8, 10, 12].map((n) => (
-                        <IonSelectOption key={n} value={n}>
-                          {n}×{n}
-                        </IonSelectOption>
-                      ))}
-                    </IonSelect>
-                  </IonItem>
-                  <IonItem>
-                    <IonCheckbox
-                      checked={timer}
-                      onIonChange={(e) => setTimer(e.detail.checked)}
-                      slot="start"
-                    />
-                    <IonLabel>{t('lobby.timer_label')}</IonLabel>
-                  </IonItem>
-                </>
-              )}
+              <IonItem>
+                <IonLabel position="stacked">{t('lobby.grid_size')}</IonLabel>
+                <IonSelect
+                  value={gridSize}
+                  onIonChange={(e) => setGridSize(Number(e.detail.value))}
+                >
+                  {[4, 6, 8, 10, 12].map((n) => (
+                    <IonSelectOption key={n} value={n}>
+                      {n}×{n}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonCheckbox
+                  checked={timer}
+                  onIonChange={(e) => setTimer(e.detail.checked)}
+                  slot="start"
+                />
+                <IonLabel>{t('lobby.timer_label')}</IonLabel>
+              </IonItem>
               {error && (
                 <p style={{ color: '#dc3545', marginTop: 12 }}>{error}</p>
               )}
               <div className="sk-row-buttons">
-                <IonButton disabled={creating} onClick={handleCreate}>
+                <IonButton disabled={creating} onClick={handleCreateCasualRoom}>
                   <IonIcon slot="start" icon={addCircleOutline} />
                   {t('lobby.create_button')}
+                </IonButton>
+                <IonButton onClick={handleFindMatch}>
+                  <IonIcon slot="start" icon={flashOutline} />
+                  {t('lobby.find_match')}
+                </IonButton>
+              </div>
+              <div className="sk-row-buttons">
+                <IonButton fill="outline" onClick={() => history.push('/online/join')}>
+                  <IonIcon slot="start" icon={enterOutline} />
+                  {t('lobby.join_game')}
+                </IonButton>
+                <IonButton fill="outline" onClick={() => setMode(null)}>
+                  {t('lobby.cancel_button')}
+                </IonButton>
+              </div>
+            </div>
+          )}
+
+          {mode === 'ranked' && (
+            <div className="sk-lobby-panel">
+              <div style={{ fontWeight: 700, marginBottom: 10, textAlign: 'center' }}>
+                {t('lobby.ranked_mode')}
+              </div>
+              <p style={{ textAlign: 'center', marginTop: 0 }}>
+                {t('lobby.ranked_matchmaking_only')}
+              </p>
+              {error && <p style={{ color: '#dc3545', marginTop: 12 }}>{error}</p>}
+              <div className="sk-row-buttons">
+                <IonButton onClick={handleFindMatch}>
+                  <IonIcon slot="start" icon={flashOutline} />
+                  {t('lobby.find_match')}
                 </IonButton>
                 <IonButton fill="outline" onClick={() => setMode(null)}>
                   {t('lobby.cancel_button')}

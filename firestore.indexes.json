@@ -1,0 +1,23 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "matchmakingQueue",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "mode",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "joinedAtMs",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}

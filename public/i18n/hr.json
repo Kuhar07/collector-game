@@ -46,7 +46,14 @@
     "join_room": "Pridruži se sobi",
     "room_code": "Kod sobe",
     "room_code_input_placeholder": "Unesite kod",
-    "join_button": "Pridruži se"
+    "join_button": "Pridruži se",
+    "find_match": "Pronađi meč",
+    "ranked_matchmaking_only": "Ranked koristi samo matchmaking. Kod sobe nije dostupan u ranked modu.",
+    "matchmaking_title": "Matchmaking",
+    "matchmaking_searching": "Traženje protivnika...",
+    "matchmaking_ranked": "Ranked red čekanja",
+    "matchmaking_casual": "Casual red čekanja",
+    "matchmaking_error": "Neuspjelo pokretanje matchmakinga. Pokušajte ponovno."
   },
   "game": {
     "new_game_dialog": "Nova Igra",

@@ -11,7 +11,7 @@ const MIN_BOARD = 100;
 
 export default function GameBoard({ state, size, history, onCellClick, disabled }) {
   const wrapperRef = useRef(null);
-  const measureRef = useRef(() => {});
+  const measureRef = useRef(() => { });
   const [pixelSize, setPixelSize] = useState(MAX_BOARD_MOBILE);
 
   useEffect(() => {

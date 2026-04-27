@@ -17,6 +17,7 @@ import AuthScreen from './pages/AuthScreen';
 import LobbyScreen from './pages/LobbyScreen';
 import WaitingRoom from './pages/WaitingRoom';
 import JoinRoomForm from './pages/JoinRoomForm';
+import MatchmakingQueuePage from './pages/MatchmakingQueuePage';
 import OnlineGamePage from './pages/OnlineGamePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 
@@ -38,6 +39,11 @@ export default function App() {
                     <Route exact path="/online/lobby" component={LobbyScreen} />
                     <Route exact path="/online/waiting/:code" component={WaitingRoom} />
                     <Route exact path="/online/join" component={JoinRoomForm} />
+                    <Route
+                      exact
+                      path="/online/matchmaking/:mode"
+                      component={MatchmakingQueuePage}
+                    />
                     <Route exact path="/online/game/:id" component={OnlineGamePage} />
                     <Route exact path="/leaderboard" component={LeaderboardPage} />
                     <Route exact path="/">
