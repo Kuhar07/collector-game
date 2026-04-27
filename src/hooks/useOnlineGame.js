@@ -12,9 +12,9 @@ import {
   applyPlace,
   applyEliminate,
   computeEloDelta,
-  ELO_K_FACTOR,
   LOCAL_MAX_TIMEOUTS
 } from '../game/gameEngine';
+import { getDisplayRatingFromProfile, normalizeSkillProfile } from '../game/skillRating';
 
 function historyXYToArray(arr) {
   return arr.map(([r, c]) => ({ r, c }));
@@ -25,7 +25,7 @@ export function useOnlineGame(gameId) {
   const { data, exists, error } = useFirestoreGame(gameId);
   const [isWriting, setIsWriting] = useState(false);
   const [localError, setLocalError] = useState('');
-  const [ratings, setRatings] = useState({ 1: 1200, 2: 1200 });
+  const [ratings, setRatings] = useState({ 1: 1000, 2: 1000 });
   const [finalResult, setFinalResult] = useState(null);
   const ratingsFetchedRef = useRef(false);
   const eloHandledRef = useRef(false);
@@ -82,8 +82,8 @@ export function useOnlineGame(gameId) {
     ])
       .then(([s1, s2]) => {
         setRatings({
-          1: s1.data()?.rating ?? 1200,
-          2: s2.data()?.rating ?? 1200
+          1: getDisplayRatingFromProfile(normalizeSkillProfile(s1.data() || {})),
+          2: getDisplayRatingFromProfile(normalizeSkillProfile(s2.data() || {}))
         });
       })
       .catch(() => { });
@@ -99,75 +99,68 @@ export function useOnlineGame(gameId) {
       return;
     }
 
-    if (myPlayerNumber === 1 && data.result.delta1 == null) {
+    if (data.result.delta1 != null && data.result.delta2 != null) {
       eloHandledRef.current = true;
-      (async () => {
-        try {
-          const p1ref = doc(db, 'players', data.player1uid);
-          const p2ref = doc(db, 'players', data.player2uid);
-          const [snap1, snap2] = await Promise.all([getDoc(p1ref), getDoc(p2ref)]);
-          const p1 = snap1.data();
-          const p2 = snap2.data();
-          if (!p1 || !p2) return;
-          const r1 = typeof p1.rating === 'number' ? p1.rating : 1200;
-          const r2 = typeof p2.rating === 'number' ? p2.rating : 1200;
-          const scoreP1 =
-            data.result.winner === 1 ? 1 : data.result.winner === 2 ? 0 : 0.5;
-          const { delta1, delta2, newR1, newR2 } = computeEloDelta(r1, r2, scoreP1);
-
-          await updateDoc(p1ref, {
-            rating: newR1,
-            games: (p1.games || 0) + 1,
-            wins: scoreP1 === 1 ? (p1.wins || 0) + 1 : p1.wins || 0,
-            losses: scoreP1 === 0 ? (p1.losses || 0) + 1 : p1.losses || 0,
-            draws: scoreP1 === 0.5 ? (p1.draws || 0) + 1 : p1.draws || 0,
-            updatedAt: serverTimestamp()
-          });
-
-          await updateDoc(doc(db, 'games', gameId), {
-            'result.delta1': delta1,
-            'result.newR1': newR1,
-            'result.delta2': delta2,
-            'result.newR2': newR2
-          });
-
-          setRatings({ 1: newR1, 2: newR2 });
-          setFinalResult({ ...data.result, delta1, delta2, newR1, newR2 });
-        } catch (e) {
-          console.error('ELO update error:', e);
-          setFinalResult(data.result);
-        }
-      })();
+      setRatings({ 1: data.result.newR1, 2: data.result.newR2 });
+      setFinalResult(data.result);
       return;
     }
 
-    if (myPlayerNumber === 2 && data.result.delta2 != null) {
-      eloHandledRef.current = true;
-      (async () => {
-        try {
-          const myRef = doc(db, 'players', user.uid);
-          const snap = await getDoc(myRef);
-          const me = snap.data();
-          if (!me) return;
-          const scoreP1 =
-            data.result.winner === 1 ? 1 : data.result.winner === 2 ? 0 : 0.5;
-          const myScore = 1 - scoreP1;
-          await updateDoc(myRef, {
-            rating: data.result.newR2,
-            games: (me.games || 0) + 1,
-            wins: myScore === 1 ? (me.wins || 0) + 1 : me.wins || 0,
-            losses: myScore === 0 ? (me.losses || 0) + 1 : me.losses || 0,
-            draws: myScore === 0.5 ? (me.draws || 0) + 1 : me.draws || 0,
-            updatedAt: serverTimestamp()
-          });
-          setRatings({ 1: data.result.newR1, 2: data.result.newR2 });
-          setFinalResult(data.result);
-        } catch (e) {
-          console.error('Own profile update error:', e);
-          setFinalResult(data.result);
-        }
-      })();
+    if (myPlayerNumber !== 1) {
+      return;
     }
+
+    eloHandledRef.current = true;
+    (async () => {
+      try {
+        const p1ref = doc(db, 'players', data.player1uid);
+        const p2ref = doc(db, 'players', data.player2uid);
+        const [snap1, snap2] = await Promise.all([getDoc(p1ref), getDoc(p2ref)]);
+        const p1 = normalizeSkillProfile(snap1.data() || {});
+        const p2 = normalizeSkillProfile(snap2.data() || {});
+        const scoreP1 = data.result.winner === 1 ? 1 : data.result.winner === 2 ? 0 : 0.5;
+        const { delta1, delta2, newR1, newR2, profile1, profile2 } = computeEloDelta(
+          p1,
+          p2,
+          scoreP1
+        );
+
+        await updateDoc(p1ref, {
+          mu: profile1.mu,
+          sigma: profile1.sigma,
+          rating: newR1,
+          games: (snap1.data()?.games || 0) + 1,
+          wins: scoreP1 === 1 ? (snap1.data()?.wins || 0) + 1 : snap1.data()?.wins || 0,
+          losses: scoreP1 === 0 ? (snap1.data()?.losses || 0) + 1 : snap1.data()?.losses || 0,
+          draws: scoreP1 === 0.5 ? (snap1.data()?.draws || 0) + 1 : snap1.data()?.draws || 0,
+          updatedAt: serverTimestamp()
+        });
+
+        await updateDoc(p2ref, {
+          mu: profile2.mu,
+          sigma: profile2.sigma,
+          rating: newR2,
+          games: (snap2.data()?.games || 0) + 1,
+          wins: scoreP1 === 0 ? (snap2.data()?.wins || 0) + 1 : snap2.data()?.wins || 0,
+          losses: scoreP1 === 1 ? (snap2.data()?.losses || 0) + 1 : snap2.data()?.losses || 0,
+          draws: scoreP1 === 0.5 ? (snap2.data()?.draws || 0) + 1 : snap2.data()?.draws || 0,
+          updatedAt: serverTimestamp()
+        });
+
+        await updateDoc(doc(db, 'games', gameId), {
+          'result.delta1': delta1,
+          'result.newR1': newR1,
+          'result.delta2': delta2,
+          'result.newR2': newR2
+        });
+
+        setRatings({ 1: newR1, 2: newR2 });
+        setFinalResult({ ...data.result, delta1, delta2, newR1, newR2 });
+      } catch (e) {
+        console.error('Rating update error:', e);
+        setFinalResult(data.result);
+      }
+    })();
   }, [data, user, myPlayerNumber, gameId]);
 
   const placeDot = useCallback(
@@ -300,21 +293,19 @@ export function useOnlineGame(gameId) {
           getDoc(doc(db, 'players', user.uid)),
           getDoc(doc(db, 'players', opponentUid))
         ]);
-        const me = mySnap.data();
-        const opp = oppSnap.data();
-        if (me && opp) {
-          const myRating = me.rating ?? 1200;
-          const oppRating = opp.rating ?? 1200;
-          const expected = 1 / (1 + 10 ** ((oppRating - myRating) / 400));
-          const delta = Math.round(ELO_K_FACTOR * (0 - expected));
-          const newRating = Math.max(100, myRating + delta);
-          await updateDoc(doc(db, 'players', user.uid), {
-            rating: newRating,
-            games: (me.games || 0) + 1,
-            losses: (me.losses || 0) + 1,
-            updatedAt: serverTimestamp()
-          });
-        }
+        const me = normalizeSkillProfile(mySnap.data() || {});
+        const opp = normalizeSkillProfile(oppSnap.data() || {});
+        const scoreP1 = user.uid === liveData.player1uid ? 0 : 1;
+        const { profile1, profile2 } = computeEloDelta(me, opp, scoreP1);
+        const myProfile = user.uid === liveData.player1uid ? profile1 : profile2;
+        await updateDoc(doc(db, 'players', user.uid), {
+          mu: myProfile.mu,
+          sigma: myProfile.sigma,
+          rating: myProfile.rating,
+          games: (mySnap.data()?.games || 0) + 1,
+          losses: (mySnap.data()?.losses || 0) + 1,
+          updatedAt: serverTimestamp()
+        });
       }
 
       await updateDoc(gameRef, { status: 'left', leftBy: user.uid });

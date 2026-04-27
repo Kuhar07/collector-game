@@ -8,23 +8,48 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase';
+import {
+  DEFAULT_DISPLAY_RATING,
+  DEFAULT_MU,
+  DEFAULT_SIGMA,
+  normalizeSkillProfile
+} from '../game/skillRating';
 
 const AuthContext = createContext(null);
 
 async function ensurePlayerProfile(user) {
   const ref = doc(db, 'players', user.uid);
   const snap = await getDoc(ref);
+  const existing = snap.data() || {};
+  const normalized = normalizeSkillProfile(existing);
+
   if (!snap.exists()) {
     await setDoc(ref, {
       displayName: user.displayName || user.email,
       email: user.email,
-      rating: 1200,
+      mu: DEFAULT_MU,
+      sigma: DEFAULT_SIGMA,
+      rating: DEFAULT_DISPLAY_RATING,
       games: 0,
       wins: 0,
       losses: 0,
       draws: 0,
       updatedAt: serverTimestamp()
     });
+    return;
+  }
+
+  if (existing.mu == null || existing.sigma == null || existing.rating == null) {
+    await setDoc(
+      ref,
+      {
+        displayName: existing.displayName || user.displayName || user.email,
+        email: existing.email || user.email,
+        ...normalized,
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
   }
 }
 

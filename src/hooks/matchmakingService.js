@@ -13,50 +13,42 @@ import {
     where
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import {
+    DEFAULT_DISPLAY_RATING,
+    DEFAULT_MU,
+    DEFAULT_SIGMA,
+    getDisplayRatingFromProfile,
+    normalizeSkillProfile
+} from '../game/skillRating';
 
 const QUEUE_COLLECTION = 'matchmakingQueue';
-const DEFAULT_RATING = 1200;
-const RANKED_BASE_RANGE = 100;
-const RANKED_RANGE_STEP = 50;
-const RANKED_RANGE_STEP_MS = 15 * 1000;
 
-function getRankedRange(waitMs) {
-    const steps = Math.floor(Math.max(0, waitMs) / RANKED_RANGE_STEP_MS);
-    return RANKED_BASE_RANGE + steps * RANKED_RANGE_STEP;
-}
-
-function canRankedPlayersMatch(selfData, candidateData, selfRating, candidateRating) {
-    const now = Date.now();
-    if (!Number.isFinite(selfRating) || !Number.isFinite(candidateRating)) {
-        return false;
+function sampleWithoutReplacement(items, count) {
+    const pool = items.slice();
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    const ratingDiff = Math.abs(selfRating - candidateRating);
-
-    const selfWaitMs = now - Number(selfData.joinedAtMs ?? now);
-    const candidateWaitMs = now - Number(candidateData.joinedAtMs ?? now);
-    const selfRange = getRankedRange(selfWaitMs);
-    const candidateRange = getRankedRange(candidateWaitMs);
-
-    return ratingDiff <= selfRange && ratingDiff <= candidateRange;
+    return pool.slice(0, Math.max(0, count));
 }
 
-async function loadRankedRatingSnapshot(userId) {
+async function loadRankedSkillSnapshot(userId) {
     const playerRef = doc(db, 'players', userId);
 
     // Prefer server value to avoid stale cache creating bad ranked matches.
     try {
         const snap = await getDocFromServer(playerRef);
-        const rating = Number(snap.data()?.rating);
-        if (Number.isFinite(rating)) return rating;
+        const profile = normalizeSkillProfile(snap.data() || {});
+        if (profile) return profile;
     } catch (_) {
         // Fallback to local cache if server read fails (e.g. temporary network issue).
     }
 
     const cachedSnap = await getDoc(playerRef);
-    const cachedRating = Number(cachedSnap.data()?.rating);
-    if (Number.isFinite(cachedRating)) return cachedRating;
+    const cachedProfile = normalizeSkillProfile(cachedSnap.data() || {});
+    if (cachedProfile) return cachedProfile;
 
-    if (cachedSnap.exists()) return DEFAULT_RATING;
+    if (cachedSnap.exists()) return normalizeSkillProfile({ rating: DEFAULT_DISPLAY_RATING });
     return null;
 }
 
@@ -101,10 +93,10 @@ function buildGamePayload({ mode, selfEntry, opponentEntry }) {
 }
 
 export async function enqueueForMatch({ user, mode, gridSize = 6, timerEnabled = false }) {
-    let ratingSnapshot = DEFAULT_RATING;
+    let skillSnapshot = normalizeSkillProfile({ mu: DEFAULT_MU, sigma: DEFAULT_SIGMA, rating: DEFAULT_DISPLAY_RATING });
     if (mode === 'ranked') {
-        ratingSnapshot = await loadRankedRatingSnapshot(user.uid);
-        if (ratingSnapshot == null) {
+        skillSnapshot = await loadRankedSkillSnapshot(user.uid);
+        if (skillSnapshot == null) {
             throw new Error('Ranked profile not ready. Please sign in again and retry.');
         }
     }
@@ -120,7 +112,9 @@ export async function enqueueForMatch({ user, mode, gridSize = 6, timerEnabled =
             email: user.email || '',
             gridSize,
             timerEnabled,
-            ratingSnapshot,
+            mu: skillSnapshot.mu,
+            sigma: skillSnapshot.sigma,
+            rating: skillSnapshot.rating,
             gameId: null,
             matchedWith: null,
             joinedAtMs: Date.now(),
@@ -149,78 +143,97 @@ export async function tryFindMatch({ userId, mode }) {
     const snapshot = await getDocs(queueQuery);
     const candidates = snapshot.docs
         .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
-        .filter((entry) => entry.uid !== userId)
-        .sort((a, b) => {
-            const diff = (a.joinedAtMs || 0) - (b.joinedAtMs || 0);
-            return diff !== 0 ? diff : a.uid.localeCompare(b.uid);
-        });
+        .filter((entry) => entry.uid !== userId);
+
+    const poolSize = Math.min(Math.ceil(candidates.length / 10), 1000);
+    const sampledCandidates = sampleWithoutReplacement(candidates, poolSize);
 
     const selfRef = doc(db, QUEUE_COLLECTION, userId);
-    const selfPlayerRef = doc(db, 'players', userId);
+    const selfSnap = await getDoc(selfRef);
+    if (!selfSnap.exists()) return null;
+    const selfData = normalizeSkillProfile(selfSnap.data() || {});
+    const selfDisplayRating = getDisplayRatingFromProfile(selfData);
 
-    for (const candidate of candidates) {
-        const candidateRef = doc(db, QUEUE_COLLECTION, candidate.uid);
-        const candidatePlayerRef = doc(db, 'players', candidate.uid);
-        const gameRef = doc(collection(db, 'games'));
+    const scoredCandidates = sampledCandidates
+        .map((candidate) => ({
+            candidate,
+            profile: normalizeSkillProfile(candidate),
+            displayRating: getDisplayRatingFromProfile(candidate)
+        }))
+        .sort((a, b) => {
+            const aDiff = Math.abs(a.displayRating - selfDisplayRating);
+            const bDiff = Math.abs(b.displayRating - selfDisplayRating);
+            if (aDiff !== bDiff) return aDiff - bDiff;
+            const tie = (a.candidate.joinedAtMs || 0) - (b.candidate.joinedAtMs || 0);
+            return tie !== 0 ? tie : a.candidate.uid.localeCompare(b.candidate.uid);
+        });
 
-        try {
-            const result = await runTransaction(db, async (tx) => {
-                const [selfSnap, candidateSnap, selfPlayerSnap, candidatePlayerSnap] = await Promise.all([
-                    tx.get(selfRef),
-                    tx.get(candidateRef),
-                    tx.get(selfPlayerRef),
-                    tx.get(candidatePlayerRef)
-                ]);
+    if (scoredCandidates.length === 0) {
+        return null;
+    }
 
-                if (!selfSnap.exists() || !candidateSnap.exists()) return null;
+    const closestDiff = Math.abs(scoredCandidates[0].displayRating - selfDisplayRating);
+    const tiedCandidates = scoredCandidates.filter(
+        (entry) => Math.abs(entry.displayRating - selfDisplayRating) === closestDiff
+    );
+    const chosenCandidate = tiedCandidates[Math.floor(Math.random() * tiedCandidates.length)];
+    const candidateRef = doc(db, QUEUE_COLLECTION, chosenCandidate.candidate.uid);
+    const gameRef = doc(collection(db, 'games'));
 
-                const selfData = selfSnap.data();
-                const candidateData = candidateSnap.data();
+    try {
+        const result = await runTransaction(db, async (tx) => {
+            const [liveSelfSnap, liveCandidateSnap] = await Promise.all([
+                tx.get(selfRef),
+                tx.get(candidateRef)
+            ]);
 
-                if (selfData.status !== 'searching' || candidateData.status !== 'searching') {
-                    return null;
-                }
-                if (selfData.mode !== mode || candidateData.mode !== mode) return null;
+            if (!liveSelfSnap.exists() || !liveCandidateSnap.exists()) return null;
 
-                if (mode === 'ranked') {
-                    const selfRating = Number(selfPlayerSnap.data()?.rating ?? selfData.ratingSnapshot);
-                    const candidateRating = Number(
-                        candidatePlayerSnap.data()?.rating ?? candidateData.ratingSnapshot
-                    );
+            const liveSelf = liveSelfSnap.data();
+            const liveCandidate = liveCandidateSnap.data();
 
-                    if (!canRankedPlayersMatch(selfData, candidateData, selfRating, candidateRating)) {
-                        return null;
-                    }
-                }
+            if (liveSelf.status !== 'searching' || liveCandidate.status !== 'searching') {
+                return null;
+            }
+            if (liveSelf.mode !== mode || liveCandidate.mode !== mode) return null;
 
-                const selfEntry = { uid: userId, ...selfData };
-                const opponentEntry = { uid: candidate.uid, ...candidateData };
+            const liveSelfRating = getDisplayRatingFromProfile(liveSelf);
+            const liveCandidateRating = getDisplayRatingFromProfile(liveCandidate);
+            if (Math.abs(liveSelfRating - liveCandidateRating) !== closestDiff) {
+                return null;
+            }
 
-                tx.set(gameRef, buildGamePayload({ mode, selfEntry, opponentEntry }));
+            const selfEntry = { uid: userId, ...liveSelf, ...selfData };
+            const opponentEntry = {
+                uid: chosenCandidate.candidate.uid,
+                ...liveCandidate,
+                ...chosenCandidate.profile
+            };
 
-                tx.update(selfRef, {
-                    status: 'matched',
-                    gameId: gameRef.id,
-                    matchedWith: candidate.uid,
-                    matchedAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                });
+            tx.set(gameRef, buildGamePayload({ mode, selfEntry, opponentEntry }));
 
-                tx.update(candidateRef, {
-                    status: 'matched',
-                    gameId: gameRef.id,
-                    matchedWith: userId,
-                    matchedAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                });
-
-                return gameRef.id;
+            tx.update(selfRef, {
+                status: 'matched',
+                gameId: gameRef.id,
+                matchedWith: chosenCandidate.candidate.uid,
+                matchedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
             });
 
-            if (result) return result;
-        } catch (_) {
-            // Another client may have matched this candidate first.
-        }
+            tx.update(candidateRef, {
+                status: 'matched',
+                gameId: gameRef.id,
+                matchedWith: userId,
+                matchedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+
+            return gameRef.id;
+        });
+
+        if (result) return result;
+    } catch (_) {
+        // Another client may have matched this candidate first.
     }
 
     return null;

@@ -7,7 +7,8 @@ import {
   applyEliminate,
   computeGameResult,
   getBiggestGroup,
-  LOCAL_MAX_TIMEOUTS
+  LOCAL_MAX_TIMEOUTS,
+  DEFAULT_FIDE_RATING
 } from '../game/gameEngine';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 
@@ -159,8 +160,8 @@ export function LocalGameProvider({ children }) {
     onTimeout,
     isActive: !!config && !result,
     ratings: {
-      1: config ? leaderboard.getRating(config.player1Name) : 1200,
-      2: config ? leaderboard.getRating(config.player2Name) : 1200
+      1: config ? leaderboard.getRating(config.player1Name) : DEFAULT_FIDE_RATING,
+      2: config ? leaderboard.getRating(config.player2Name) : DEFAULT_FIDE_RATING
     },
     leaderboard
   };

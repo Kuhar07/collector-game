@@ -1,7 +1,13 @@
 // Pure game logic ported from legacy script.js — no DOM, no side effects.
 
-export const DEFAULT_FIDE_RATING = 1200;
-export const ELO_K_FACTOR = 32;
+import {
+  DEFAULT_DISPLAY_RATING,
+  OPEN_SKILL_BETA,
+  computeSkillDelta
+} from './skillRating';
+
+export const DEFAULT_FIDE_RATING = DEFAULT_DISPLAY_RATING;
+export const ELO_K_FACTOR = OPEN_SKILL_BETA;
 export const LOCAL_TURN_TIME = 30;
 export const LOCAL_MAX_TIMEOUTS = 3;
 
@@ -117,15 +123,7 @@ export function getExpectedScore(ratingA, ratingB) {
 }
 
 export function computeEloDelta(r1, r2, scoreP1) {
-  const expected = getExpectedScore(r1, r2);
-  const delta1 = Math.round(ELO_K_FACTOR * (scoreP1 - expected));
-  const delta2 = -delta1;
-  return {
-    delta1,
-    delta2,
-    newR1: Math.max(100, r1 + delta1),
-    newR2: Math.max(100, r2 + delta2)
-  };
+  return computeSkillDelta(r1, r2, scoreP1);
 }
 
 export function formatDelta(d) {
