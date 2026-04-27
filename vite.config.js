@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'i18n/en.json', 'i18n/hr.json'],
+      includeAssets: ['icons/favicon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'i18n/en.json', 'i18n/hr.json'],
       manifest: {
         name: 'Collector',
         short_name: 'Collector',
@@ -18,9 +18,9 @@ export default defineConfig({
         orientation: 'portrait',
         start_url: '/',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'icons/favicon.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/favicon.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/favicon.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {

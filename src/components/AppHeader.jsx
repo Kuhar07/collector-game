@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   IonHeader,
   IonToolbar,
@@ -8,22 +8,19 @@ import {
   IonIcon
 } from '@ionic/react';
 import {
-  ellipsisVerticalOutline,
+  helpCircleOutline,
   languageOutline,
   moonOutline,
   sunnyOutline
 } from 'ionicons/icons';
 import { useI18n } from '../contexts/I18nContext';
 import { useTheme } from '../contexts/ThemeContext';
-import AppMenuDropdown from './AppMenuDropdown';
 import RulesModal from './RulesModal';
 
 export default function AppHeader({ title }) {
   const { t, lang, toggleLang } = useI18n();
   const { isDark, toggleTheme } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const popoverTriggerId = useRef(`menu-trigger-${Math.random().toString(36).slice(2, 8)}`);
 
   return (
     <>
@@ -35,12 +32,12 @@ export default function AppHeader({ title }) {
           <IonButtons slot="end">
             <IonButton
               onClick={toggleLang}
-              title={lang === 'en' ? 'HR' : 'EN'}
+              title={lang === 'en' ? 'EN' : 'HR'}
               aria-label="Toggle language"
             >
               <IonIcon slot="icon-only" icon={languageOutline} />
               <span style={{ marginLeft: 4, fontWeight: 700, fontSize: 12 }}>
-                {lang === 'en' ? 'HR' : 'EN'}
+                {lang === 'en' ? 'EN' : 'HR'}
               </span>
             </IonButton>
             <IonButton
@@ -48,29 +45,19 @@ export default function AppHeader({ title }) {
               title={isDark ? t('menu.theme_light') : t('menu.theme_dark')}
               aria-label="Toggle theme"
             >
-              <IonIcon slot="icon-only" icon={isDark ? sunnyOutline : moonOutline} />
+              <IonIcon slot="icon-only" icon={isDark ? moonOutline : sunnyOutline} />
             </IonButton>
             <IonButton
-              id={popoverTriggerId.current}
-              onClick={() => setMenuOpen(true)}
-              title={t('header.dropdown')}
-              aria-label="Menu"
+              onClick={() => setRulesOpen(true)}
+              title={t('rules.title')}
+              aria-label="Rules"
             >
-              <IonIcon slot="icon-only" icon={ellipsisVerticalOutline} />
+              <IonIcon slot="icon-only" icon={helpCircleOutline} />
             </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
 
-      <AppMenuDropdown
-        triggerId={popoverTriggerId.current}
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        onShowRules={() => {
-          setMenuOpen(false);
-          setRulesOpen(true);
-        }}
-      />
       <RulesModal open={rulesOpen} onClose={() => setRulesOpen(false)} />
     </>
   );

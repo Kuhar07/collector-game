@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
               <IonLabel>{t('leaderboard.online_section')}</IonLabel>
             </IonSegmentButton>
           </IonSegment>
-          <div style={{ marginTop: 20 }}>
+          <div className="sk-leaderboard-container">
             {tab === 'local' && (
               <Table
                 rows={localPlayers}

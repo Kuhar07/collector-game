@@ -71,14 +71,14 @@ export default function OfflineGamePage() {
     const p2 = config.player2Name;
     const ratingLine = rating
       ? '\n' +
-        t('game.rating_change', {
-          p1,
-          d1: formatDelta(rating.delta1),
-          r1: rating.rating1,
-          p2,
-          d2: formatDelta(rating.delta2),
-          r2: rating.rating2
-        })
+      t('game.rating_change', {
+        p1,
+        d1: formatDelta(rating.delta1),
+        r1: rating.rating1,
+        p2,
+        d2: formatDelta(rating.delta2),
+        r2: rating.rating2
+      })
       : '';
     if (timeout) {
       const loserName = loser === 1 ? p1 : p2;
@@ -107,7 +107,7 @@ export default function OfflineGamePage() {
               </div>
               <div className="sk-player-score">{scores[1]}</div>
             </div>
-            <div className="sk-status" style={{ color: statusColor }}>
+            <div className="sk-status sk-status-desktop" style={{ color: statusColor }}>
               {isActive ? statusText : ''}
             </div>
             <div className={`sk-player-info${currentPlayer === 2 ? ' active' : ''}`}>
@@ -139,6 +139,10 @@ export default function OfflineGamePage() {
               <IonIcon slot="start" icon={homeOutline} />
               {menuButtonLabel}
             </IonButton>
+          </div>
+
+          <div className="sk-status sk-status-mobile" style={{ color: statusColor }}>
+            {isActive ? statusText : ''}
           </div>
         </div>
 

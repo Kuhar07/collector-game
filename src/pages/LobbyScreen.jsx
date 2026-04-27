@@ -16,9 +16,9 @@ import {
   trophyOutline,
   enterOutline,
   trophySharp,
-  arrowBackOutline,
   addCircleOutline,
-  flashOutline
+  flashOutline,
+  logOutOutline
 } from 'ionicons/icons';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
@@ -35,13 +35,14 @@ function generateGameCode() {
 
 export default function LobbyScreen() {
   const { t } = useI18n();
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const history = useHistory();
   const [mode, setMode] = useState(null); // null | 'casual' | 'ranked'
   const [gridSize, setGridSize] = useState(6);
   const [timer, setTimer] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [showEmail, setShowEmail] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) history.replace('/online/auth');
@@ -94,13 +95,22 @@ export default function LobbyScreen() {
     history.push(`/online/matchmaking/${mode}${params}`);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    history.push('/online');
+  };
+
+  const handleUserBarClick = () => {
+    setShowEmail(!showEmail);
+  };
+
   return (
     <IonPage>
       <AppHeader title={t('app_title')} />
       <IonContent fullscreen>
         <div className="sk-menu-content">
-          <div className="sk-user-bar">
-            {user.displayName || user.email}
+          <div className="sk-user-bar" title={user.email} onClick={handleUserBarClick}>
+            {showEmail ? user.email : (user.displayName || user.email)}
           </div>
 
           {!mode && (
@@ -132,10 +142,10 @@ export default function LobbyScreen() {
               <IonButton
                 fill="outline"
                 expand="block"
-                onClick={() => history.replace('/offline')}
+                onClick={handleSignOut}
               >
-                <IonIcon slot="start" icon={arrowBackOutline} />
-                {t('lobby.back')}
+                <IonIcon slot="start" icon={logOutOutline} />
+                {t('header.sign_out')}
               </IonButton>
             </div>
           )}

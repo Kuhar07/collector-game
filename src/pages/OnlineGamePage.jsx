@@ -149,7 +149,7 @@ export default function OnlineGamePage() {
               </div>
               <div className="sk-player-score">{scores[1]}</div>
             </div>
-            <div className="sk-status" style={{ color: statusColor }}>
+            <div className="sk-status sk-status-desktop" style={{ color: statusColor }}>
               {data.status === 'active' ? statusText : ''}
             </div>
             <div className={`sk-player-info${data.currentPlayer === 2 ? ' active' : ''}`}>
@@ -184,6 +184,10 @@ export default function OnlineGamePage() {
               <IonIcon slot="start" icon={homeOutline} />
               {menuButtonLabel}
             </IonButton>
+          </div>
+
+          <div className="sk-status sk-status-mobile" style={{ color: statusColor }}>
+            {data.status === 'active' ? statusText : ''}
           </div>
         </div>
 

@@ -3,8 +3,19 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 const ThemeContext = createContext(null);
 const STORAGE_KEY = 'sakupljac_theme';
 
+function getSystemTheme() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return 'light';
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => localStorage.getItem(STORAGE_KEY) || 'light');
+  const [theme, setThemeState] = useState(() => {
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+    return savedTheme || getSystemTheme();
+  });
+  const [followSystem, setFollowSystem] = useState(() => !localStorage.getItem(STORAGE_KEY));
 
   useEffect(() => {
     const body = document.body;
@@ -16,11 +27,40 @@ export function ThemeProvider({ children }) {
       body.classList.remove('dark');
     }
     body.setAttribute('data-theme', theme);
-    localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
-  const setTheme = useCallback((t) => setThemeState(t), []);
+  useEffect(() => {
+    if (followSystem) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, theme);
+  }, [theme, followSystem]);
+
+  useEffect(() => {
+    if (!followSystem || typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (event) => {
+      setThemeState(event.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    setThemeState(mediaQuery.matches ? 'dark' : 'light');
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [followSystem]);
+
+  const setTheme = useCallback((t) => {
+    setFollowSystem(false);
+    setThemeState(t);
+  }, []);
   const toggleTheme = useCallback(() => {
+    setFollowSystem(false);
     setThemeState((t) => (t === 'dark' ? 'light' : 'dark'));
   }, []);
 

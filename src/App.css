@@ -60,13 +60,34 @@
 }
 
 .sk-user-bar {
-  font-size: 13px;
-  margin-bottom: 16px;
-  color: var(--sk-user-bar-color);
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  padding: 12px 20px;
+  color: var(--sk-text);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  border-radius: 8px;
+  background: var(--sk-dialog-bg);
+  border: 1px solid var(--sk-cell-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 280px;
+  word-break: break-word;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sk-user-bar:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.sk-user-bar:active {
+  transform: scale(0.98);
 }
 
 .sk-lobby-panel {
@@ -148,9 +169,13 @@
 .sk-status {
   text-align: center;
   font-weight: 600;
-  font-size: 0.88rem;
-  padding: 6px 14px;
-  min-width: 140px;
+  font-size: 1rem;
+  padding: 4px 10px;
+  min-width: 120px;
+}
+
+.sk-status-mobile {
+  display: none;
 }
 
 .sk-turn-timer {
@@ -259,6 +284,15 @@
 }
 
 /* Leaderboard */
+.sk-leaderboard-container {
+  width: 100%;
+  background: var(--sk-dialog-bg);
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .sk-leaderboard-table {
   width: 100%;
   border-collapse: collapse;
@@ -478,7 +512,27 @@ ion-content.sk-game-content::part(scroll) {
   .sk-status {
     flex: 1 1 100%;
     min-width: 0;
-    padding: 3px 8px;
+    padding: 2px 6px;
+    font-size: 1rem;
+  }
+
+  .sk-status-mobile {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--sk-dialog-bg);
+    border: 1px solid var(--sk-cell-border);
+    text-align: center;
+    font-size: 1.08rem;
+    font-weight: 700;
+    box-sizing: border-box;
+  }
+
+  .sk-status-desktop {
+    display: none;
   }
 
   .sk-turn-timer {
