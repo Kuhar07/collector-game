@@ -117,6 +117,7 @@
     "online_error": "Greška pri spajanju na online igru",
     "timeout": "Veza je istekla. Pokušajte ponovo.",
     "opponent_left": "Protivnik je napustio igru",
+    "opponent_left_no_rating_change": "Protivnik je napustio ranked meč. Vraćeni ste u izbornik i vaš rejting se nije promijenio.",
     "invalid_move": "Nevaljano postavljanje",
     "waiting_for_opponent": "Čekanje protivnika...",
     "your_turn": "Tvoj potez",

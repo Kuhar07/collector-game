@@ -38,6 +38,7 @@ export default function OnlineGamePage() {
 
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [alertError, setAlertError] = useState('');
+  const [opponentLeftOpen, setOpponentLeftOpen] = useState(false);
 
   useEffect(() => {
     if (exists === false) history.replace('/online/lobby');
@@ -45,10 +46,21 @@ export default function OnlineGamePage() {
 
   useEffect(() => {
     if (!data) return;
-    if (data.status === 'left') {
-      setAlertError(t('notifications.opponent_left'));
+    const opponentLeft =
+      data.status === 'left' &&
+      data.leftBy &&
+      myPlayerNumber != null &&
+      data.leftBy !== (myPlayerNumber === 1 ? data.player1uid : data.player2uid);
+
+    if (opponentLeft) {
+      const key =
+        data.mode === 'ranked'
+          ? 'notifications.opponent_left_no_rating_change'
+          : 'notifications.opponent_left';
+      setAlertError(t(key));
+      setOpponentLeftOpen(true);
     }
-  }, [data, t]);
+  }, [data, t, myPlayerNumber]);
 
   useEffect(() => {
     if (localError) setAlertError(t(localError));
@@ -77,14 +89,14 @@ export default function OnlineGamePage() {
     const ratingLine =
       delta1 != null && delta2 != null
         ? '\n' +
-          t('game.rating_change', {
-            p1,
-            d1: formatDelta(delta1),
-            r1: newR1,
-            p2,
-            d2: formatDelta(delta2),
-            r2: newR2
-          })
+        t('game.rating_change', {
+          p1,
+          d1: formatDelta(delta1),
+          r1: newR1,
+          p2,
+          d2: formatDelta(delta2),
+          r2: newR2
+        })
         : '';
     if (timeout) {
       const loserName = loser === 1 ? p1 : p2;
@@ -187,11 +199,32 @@ export default function OnlineGamePage() {
         />
 
         <IonAlert
-          isOpen={!!alertError}
-          onDidDismiss={() => setAlertError('')}
+          isOpen={!!alertError && !opponentLeftOpen}
+          onDidDismiss={() => {
+            setAlertError('');
+          }}
           header={t('app_title')}
           message={alertError}
           buttons={[t('notifications.ok_button')]}
+        />
+
+        <IonAlert
+          isOpen={opponentLeftOpen}
+          backdropDismiss={false}
+          onDidDismiss={() => {
+            setOpponentLeftOpen(false);
+            setAlertError('');
+          }}
+          header={t('app_title')}
+          message={alertError}
+          buttons={[
+            {
+              text: t('notifications.ok_button'),
+              handler: () => {
+                history.replace('/online/lobby');
+              }
+            }
+          ]}
         />
 
         <IonAlert

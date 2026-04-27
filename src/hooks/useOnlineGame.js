@@ -282,12 +282,20 @@ export function useOnlineGame(gameId) {
 
   const leaveGame = useCallback(async () => {
     if (!data || !user || !gameId) return;
-    const isActive = data.status === 'active';
-    const update = { status: 'left', leftBy: user.uid };
+    const gameRef = doc(db, 'games', gameId);
     try {
-      if (isActive && data.mode === 'ranked') {
+      const liveSnap = await getDoc(gameRef);
+      if (!liveSnap.exists()) return;
+      const liveData = liveSnap.data();
+
+      // If game already ended/left, do not apply additional leave penalties.
+      if (liveData.status !== 'active') {
+        return;
+      }
+
+      if (liveData.mode === 'ranked') {
         const opponentUid =
-          user.uid === data.player1uid ? data.player2uid : data.player1uid;
+          user.uid === liveData.player1uid ? liveData.player2uid : liveData.player1uid;
         const [mySnap, oppSnap] = await Promise.all([
           getDoc(doc(db, 'players', user.uid)),
           getDoc(doc(db, 'players', opponentUid))
@@ -308,7 +316,8 @@ export function useOnlineGame(gameId) {
           });
         }
       }
-      await updateDoc(doc(db, 'games', gameId), update);
+
+      await updateDoc(gameRef, { status: 'left', leftBy: user.uid });
     } catch (e) {
       console.warn('Leave game failed:', e);
     }

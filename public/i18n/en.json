@@ -117,6 +117,7 @@
     "online_error": "Error connecting to online game",
     "timeout": "Connection timeout. Please try again.",
     "opponent_left": "Opponent has left the game",
+    "opponent_left_no_rating_change": "Opponent has left the ranked match. You were returned to lobby and your rating did not change.",
     "invalid_move": "Invalid move",
     "waiting_for_opponent": "Waiting for opponent...",
     "your_turn": "Your turn",
