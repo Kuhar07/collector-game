@@ -1,5 +1,5 @@
 {
-  "app_title": "Sakupljač",
+  "app_title": "Collector",
   "tabs": {
     "offline": "Offline",
     "online": "Online",
@@ -100,7 +100,29 @@
   },
   "rules": {
     "title": "Rules",
-    "description": "The story is simple, monkey.",
+    "description": "Each turn has two steps: place a dot, then eliminate one adjacent cell.",
+    "items": [
+      {
+        "title": "1. Place a dot",
+        "text": "Your first dot can go anywhere. Later dots do not have to be next to another dot, but if they are placed away from your group, they will not connect to it. Dots can connect horizontally, vertically, and diagonally."
+      },
+      {
+        "title": "2. Eliminate a cell",
+        "text": "After placing a dot, you must eliminate one cell next to that dot. The eliminated cell becomes blocked for the rest of the game."
+      },
+      {
+        "title": "3. Score points",
+        "text": "Your score is the size of your largest connected group of dots."
+      },
+      {
+        "title": "4. Casual mode",
+        "text": "Casual games let you choose the board size and timer. You can also create or join rooms manually."
+      },
+      {
+        "title": "5. Ranked mode",
+        "text": "Ranked games always use an 8×8 board, 30-second turns, and matchmaking only. If your opponent leaves, you return to the lobby and your rating does not change."
+      }
+    ],
     "close_button": "Close"
   },
   "menu_bar": {

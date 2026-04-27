@@ -17,7 +17,7 @@ export function I18nProvider({ children }) {
         if (cancelled) return;
         setTranslations(data);
         setReady(true);
-        document.title = data.app_title || 'Sakupljač';
+        document.title = data.app_title || 'Collector';
       })
       .catch((e) => console.error('Failed to load translations', e));
     return () => {

@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'i18n/en.json', 'i18n/hr.json'],
       manifest: {
-        name: 'Sakupljač',
-        short_name: 'Sakupljač',
-        description: 'Sakupljač — grid strategy game with online multiplayer',
+        name: 'Collector',
+        short_name: 'Collector',
+        description: 'Collector — grid strategy game with online multiplayer',
         theme_color: '#007bff',
         background_color: '#ffffff',
         display: 'standalone',

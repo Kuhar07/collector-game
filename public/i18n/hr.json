@@ -100,7 +100,29 @@
   },
   "rules": {
     "title": "Pravila",
-    "description": "Priča je jednostavna, majmune.",
+    "description": "Svaki potez ima dva koraka: postavite točku, pa osjenčajte jedno susjedno polje.",
+    "items": [
+      {
+        "title": "1. Postavite točku",
+        "text": "Prva točka može ići bilo gdje. Kasnije točke ne moraju biti odmah uz drugu točku, ali ako ih postavite dalje od svoje grupe, neće se povezati s njom. Točke se mogu povezivati horizontalno, vertikalno i dijagonalno."
+      },
+      {
+        "title": "2. Osjenčajte polje",
+        "text": "Nakon postavljanja točke morate osjenčati jedno polje koje je susjedno toj točki. Osjenčano polje ostaje blokirano do kraja igre."
+      },
+      {
+        "title": "3. Rezultat",
+        "text": "Rezultat je veličina vaše najveće povezane grupe točaka."
+      },
+      {
+        "title": "4. Casual mod",
+        "text": "Casual igre dopuštaju izbor veličine ploče i mjerača vremena. Također možete ručno stvarati ili se pridružiti sobama."
+      },
+      {
+        "title": "5. Ranked mod",
+        "text": "Ranked igre uvijek koriste ploču 8×8, 30 sekundi po potezu i samo matchmaking. Ako protivnik napusti igru, vraćate se u izbornik i vaš rejting se ne mijenja."
+      }
+    ],
     "close_button": "Zatvori"
   },
   "menu_bar": {

@@ -347,6 +347,53 @@ ion-content.sk-game-content::part(scroll) {
   white-space: pre-wrap;
 }
 
+.sk-rules-content::part(scroll) {
+  overflow-y: auto;
+}
+
+.sk-rules-shell {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.sk-rules-intro {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--sk-text);
+}
+
+.sk-rules-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.sk-rule-card {
+  border: 1px solid var(--sk-cell-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--sk-dialog-bg), rgba(255, 255, 255, 0.02));
+  padding: 14px 14px 13px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.sk-rule-card-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--sk-text);
+}
+
+.sk-rule-card-text {
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--sk-text);
+}
+
+@media (min-width: 800px) {
+  .sk-rules-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* Header tweaks */
 .sk-header-title {
   background: linear-gradient(45deg, #dc3545, #007bff);
