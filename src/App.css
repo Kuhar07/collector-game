@@ -452,7 +452,7 @@ ion-content.sk-game-content::part(scroll) {
 
 .sk-game-stage .sk-game-controls {
   margin-top: 4px;
-  margin-bottom: 0;
+  margin-bottom: calc(env(safe-area-inset-bottom) + 12px);
   padding: 0;
 }
 
@@ -494,7 +494,7 @@ ion-content.sk-game-content::part(scroll) {
 
   .sk-game-controls {
     margin-top: 4px;
-    margin-bottom: 0;
+    margin-bottom: calc(env(safe-area-inset-bottom) + 14px);
     gap: 6px;
   }
 
