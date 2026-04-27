@@ -13,7 +13,6 @@ import GameBoard from '../components/GameBoard';
 import { useI18n } from '../contexts/I18nContext';
 import { useLocalGame } from '../contexts/LocalGameContext';
 import { useGameTimer } from '../hooks/useGameTimer';
-import { formatDelta } from '../game/gameEngine';
 import { useState } from 'react';
 
 export default function OfflineGamePage() {
@@ -26,7 +25,6 @@ export default function OfflineGamePage() {
     phase,
     history: placementHistory,
     scores,
-    ratings,
     result,
     turnKey,
     placeDot,
@@ -66,33 +64,21 @@ export default function OfflineGamePage() {
 
   const buildGameOverMessage = () => {
     if (!result) return '';
-    const { winner, score1, score2, rating, timeout, loser } = result;
+    const { winner, timeout, loser } = result;
     const { p1 } = { p1: config.player1Name };
     const p2 = config.player2Name;
-    const ratingLine = rating
-      ? '\n' +
-      t('game.rating_change', {
-        p1,
-        d1: formatDelta(rating.delta1),
-        r1: rating.rating1,
-        p2,
-        d2: formatDelta(rating.delta2),
-        r2: rating.rating2
-      })
-      : '';
     if (timeout) {
       const loserName = loser === 1 ? p1 : p2;
       const winnerName = winner === 1 ? p1 : p2;
       return (
         t('game.timeout_loss', { player: loserName }) +
         '\n' +
-        t('game.game_over_winner', { player: winnerName }) +
-        ratingLine
+        t('game.game_over_winner', { player: winnerName })
       );
     }
-    if (winner === 0) return t('game.game_over_draw') + ratingLine;
+    if (winner === 0) return t('game.game_over_draw');
     const winnerName = winner === 1 ? p1 : p2;
-    return t('game.game_over_winner', { player: winnerName }) + ratingLine;
+    return t('game.game_over_winner', { player: winnerName });
   };
 
   return (
@@ -103,7 +89,7 @@ export default function OfflineGamePage() {
           <div className="sk-game-header">
             <div className={`sk-player-info${currentPlayer === 1 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#dc3545' }}>
-                {config.player1Name} ({ratings[1]})
+                {config.player1Name}
               </div>
               <div className="sk-player-score">{scores[1]}</div>
             </div>
@@ -112,7 +98,7 @@ export default function OfflineGamePage() {
             </div>
             <div className={`sk-player-info${currentPlayer === 2 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#007bff' }}>
-                {config.player2Name} ({ratings[2]})
+                {config.player2Name}
               </div>
               <div className="sk-player-score">{scores[2]}</div>
             </div>

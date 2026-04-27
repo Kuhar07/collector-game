@@ -7,17 +7,14 @@ import {
   applyEliminate,
   computeGameResult,
   getBiggestGroup,
-  LOCAL_MAX_TIMEOUTS,
-  DEFAULT_FIDE_RATING
+  LOCAL_MAX_TIMEOUTS
 } from '../game/gameEngine';
-import { useLeaderboard } from '../hooks/useLeaderboard';
 
 const LocalGameContext = createContext(null);
 
 const emptyHistory = () => ({ 1: [], 2: [] });
 
 export function LocalGameProvider({ children }) {
-  const leaderboard = useLeaderboard();
   const [config, setConfig] = useState(null); // { player1Name, player2Name, gridSize, timerEnabled }
   const [state, setState] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(1);
@@ -30,8 +27,6 @@ export function LocalGameProvider({ children }) {
 
   const startGame = useCallback(
     ({ player1Name, player2Name, gridSize, timerEnabled }) => {
-      leaderboard.ensureProfile(player1Name);
-      leaderboard.ensureProfile(player2Name);
       setConfig({ player1Name, player2Name, gridSize, timerEnabled });
       setState(createInitialState(gridSize));
       setCurrentPlayer(1);
@@ -42,7 +37,7 @@ export function LocalGameProvider({ children }) {
       setTurnKey((k) => k + 1);
       setResult(null);
     },
-    [leaderboard]
+    []
   );
 
   const resetGame = useCallback(() => {
@@ -71,12 +66,9 @@ export function LocalGameProvider({ children }) {
   const finalize = useCallback(
     (gameResult) => {
       if (!config) return;
-      const scoreP1 =
-        gameResult.winner === 0 ? 0.5 : gameResult.winner === 1 ? 1 : 0;
-      const rat = leaderboard.recordGame(config.player1Name, config.player2Name, scoreP1);
-      setResult({ ...gameResult, rating: rat });
+      setResult(gameResult);
     },
-    [config, leaderboard]
+    [config]
   );
 
   const placeDot = useCallback(
@@ -158,12 +150,7 @@ export function LocalGameProvider({ children }) {
     resetGame,
     clearGame,
     onTimeout,
-    isActive: !!config && !result,
-    ratings: {
-      1: config ? leaderboard.getRating(config.player1Name) : DEFAULT_FIDE_RATING,
-      2: config ? leaderboard.getRating(config.player2Name) : DEFAULT_FIDE_RATING
-    },
-    leaderboard
+    isActive: !!config && !result
   };
 
   return <LocalGameContext.Provider value={value}>{children}</LocalGameContext.Provider>;

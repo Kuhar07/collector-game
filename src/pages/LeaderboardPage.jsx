@@ -2,15 +2,12 @@ import { useEffect, useState } from 'react';
 import {
   IonPage,
   IonContent,
-  IonSegment,
-  IonSegmentButton,
   IonLabel,
   IonSpinner
 } from '@ionic/react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import { useI18n } from '../contexts/I18nContext';
-import { useLeaderboard } from '../hooks/useLeaderboard';
 import { db } from '../firebase';
 
 function Table({ rows, t, empty, keyFn, renderName, renderRating }) {
@@ -45,14 +42,12 @@ function Table({ rows, t, empty, keyFn, renderName, renderRating }) {
 
 export default function LeaderboardPage() {
   const { t } = useI18n();
-  const { players: localPlayers } = useLeaderboard();
-  const [tab, setTab] = useState('local');
   const [onlinePlayers, setOnlinePlayers] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (tab !== 'online' || onlinePlayers !== null) return;
+    if (onlinePlayers !== null) return;
     let cancelled = false;
     setLoading(true);
     setError('');
@@ -73,41 +68,26 @@ export default function LeaderboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [tab, onlinePlayers]);
+  }, [onlinePlayers]);
 
   return (
     <IonPage>
       <AppHeader title={t('leaderboard.title')} />
       <IonContent fullscreen>
         <div className="sk-tab-section ion-padding">
-          <IonSegment value={tab} onIonChange={(e) => setTab(e.detail.value)}>
-            <IonSegmentButton value="local">
-              <IonLabel>{t('leaderboard.local_section')}</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="online">
-              <IonLabel>{t('leaderboard.online_section')}</IonLabel>
-            </IonSegmentButton>
-          </IonSegment>
+          <div className="sk-leaderboard-heading">
+            <IonLabel>{t('leaderboard.online_section')}</IonLabel>
+          </div>
           <div className="sk-leaderboard-container">
-            {tab === 'local' && (
-              <Table
-                rows={localPlayers}
-                t={t}
-                empty={t('leaderboard.empty_local')}
-                keyFn={(p) => p.id}
-                renderName={(p) => p.name}
-                renderRating={(p) => p.rating}
-              />
-            )}
-            {tab === 'online' && loading && (
+            {loading && (
               <div style={{ textAlign: 'center', marginTop: 24 }}>
                 <IonSpinner /> <div>{t('leaderboard.loading')}</div>
               </div>
             )}
-            {tab === 'online' && error && (
+            {error && (
               <p style={{ color: '#dc3545', textAlign: 'center' }}>{error}</p>
             )}
-            {tab === 'online' && onlinePlayers && !loading && (
+            {onlinePlayers && !loading && (
               <Table
                 rows={onlinePlayers}
                 t={t}

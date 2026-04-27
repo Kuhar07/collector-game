@@ -4,10 +4,11 @@ import { normalizeHistory } from '../utils/coordinateNormalization';
 
 const P1_COLOR = '#dc3545';
 const P2_COLOR = '#007bff';
-const MAX_BOARD_MOBILE = 600;
+const MIN_BOARD_MOBILE = 220;
+const MIN_BOARD_DESKTOP = 180;
+const MAX_BOARD_MOBILE = 430;
 const MAX_BOARD_DESKTOP = 760;
 const DESKTOP_BREAKPOINT = 900;
-const MIN_BOARD = 100;
 
 export default function GameBoard({ state, size, history, onCellClick, disabled }) {
   const wrapperRef = useRef(null);
@@ -20,18 +21,25 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
       const stage = wrapperRef.current.parentElement;
       const containerWidth = stage?.clientWidth || wrapperRef.current.clientWidth;
       const width = Math.floor(containerWidth) - 2;
-      const maxBoard = window.innerWidth >= DESKTOP_BREAKPOINT ? MAX_BOARD_DESKTOP : MAX_BOARD_MOBILE;
+      const isDesktop = window.innerWidth >= DESKTOP_BREAKPOINT;
+      const mobileTarget = Math.floor(window.innerWidth * 0.9);
+      const maxBoard = isDesktop
+        ? MAX_BOARD_DESKTOP
+        : Math.min(MAX_BOARD_MOBILE, Math.max(MIN_BOARD_MOBILE, mobileTarget));
+      const minBoard = isDesktop ? MIN_BOARD_DESKTOP : MIN_BOARD_MOBILE;
 
       const wrapperRect = wrapperRef.current.getBoundingClientRect();
       const controlsHeight = stage?.querySelector('.sk-game-controls')?.getBoundingClientRect().height || 0;
+      const mobileStatusHeight = stage?.querySelector('.sk-status-mobile')?.getBoundingClientRect().height || 0;
       const tabBarHeight = document.querySelector('ion-tab-bar')?.getBoundingClientRect().height || 0;
-      const bottomReserve = controlsHeight + tabBarHeight + 12;
+      const layoutReserve = window.innerWidth >= 641 ? 24 : 14;
+      const bottomReserve = controlsHeight + mobileStatusHeight + tabBarHeight + layoutReserve;
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
       const availableHeight = Math.max(
-        MIN_BOARD,
+        minBoard,
         Math.floor(viewportHeight - wrapperRect.top - bottomReserve)
       );
-      const calculated = Math.min(maxBoard, Math.max(MIN_BOARD, Math.min(width, availableHeight)));
+      const calculated = Math.min(maxBoard, Math.max(minBoard, Math.min(width, availableHeight)));
       setPixelSize(calculated);
     };
     measureRef.current = measure;

@@ -27,12 +27,8 @@ export default function NameDialog({ open, onCancel, onStart }) {
   const [error, setError] = useState('');
 
   const handleStart = () => {
-    const p1t = p1.trim();
-    const p2t = p2.trim();
-    if (!p1t || !p2t) {
-      setError(t('game.enter_both_names'));
-      return;
-    }
+    const p1t = p1.trim() || 'Player 1';
+    const p2t = p2.trim() || 'Player 2';
     setError('');
     onStart({ player1Name: p1t, player2Name: p2t, gridSize: size, timerEnabled: timer });
   };

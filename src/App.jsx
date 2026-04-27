@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonTabs } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 
@@ -21,6 +23,19 @@ import MatchmakingQueuePage from './pages/MatchmakingQueuePage';
 import OnlineGamePage from './pages/OnlineGamePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 
+function RouteFocusReset() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  }, [location.pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <IonApp>
@@ -30,6 +45,7 @@ export default function App() {
             <LocalGameProvider>
               <BackgroundCanvas />
               <IonReactRouter>
+                <RouteFocusReset />
                 <IonTabs>
                   <IonRouterOutlet>
                     <Route exact path="/offline" component={OfflinePage} />
