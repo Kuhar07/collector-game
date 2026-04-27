@@ -4,12 +4,15 @@ import { normalizeHistory } from '../utils/coordinateNormalization';
 
 const P1_COLOR = '#dc3545';
 const P2_COLOR = '#007bff';
-const MAX_BOARD = 600;
+const MAX_BOARD_MOBILE = 600;
+const MAX_BOARD_DESKTOP = 760;
+const DESKTOP_BREAKPOINT = 900;
 const MIN_BOARD = 100;
 
 export default function GameBoard({ state, size, history, onCellClick, disabled }) {
   const wrapperRef = useRef(null);
-  const [pixelSize, setPixelSize] = useState(MAX_BOARD);
+  const measureRef = useRef(() => {});
+  const [pixelSize, setPixelSize] = useState(MAX_BOARD_MOBILE);
 
   useEffect(() => {
     const measure = () => {
@@ -17,17 +20,21 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
       const stage = wrapperRef.current.parentElement;
       const containerWidth = stage?.clientWidth || wrapperRef.current.clientWidth;
       const width = Math.floor(containerWidth) - 2;
+      const maxBoard = window.innerWidth >= DESKTOP_BREAKPOINT ? MAX_BOARD_DESKTOP : MAX_BOARD_MOBILE;
 
-      const stageRect = stage?.getBoundingClientRect();
       const wrapperRect = wrapperRef.current.getBoundingClientRect();
-      const stageBottom = stageRect?.bottom ?? window.innerHeight ?? 0;
       const controlsHeight = stage?.querySelector('.sk-game-controls')?.getBoundingClientRect().height || 0;
       const tabBarHeight = document.querySelector('ion-tab-bar')?.getBoundingClientRect().height || 0;
-      const bottomReserve = controlsHeight + tabBarHeight + 4;
-      const availableHeight = Math.max(MIN_BOARD, Math.floor(stageBottom - wrapperRect.top - bottomReserve));
-      const calculated = Math.min(MAX_BOARD, Math.max(MIN_BOARD, Math.min(width, availableHeight)));
+      const bottomReserve = controlsHeight + tabBarHeight + 12;
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const availableHeight = Math.max(
+        MIN_BOARD,
+        Math.floor(viewportHeight - wrapperRect.top - bottomReserve)
+      );
+      const calculated = Math.min(maxBoard, Math.max(MIN_BOARD, Math.min(width, availableHeight)));
       setPixelSize(calculated);
     };
+    measureRef.current = measure;
 
     // Initial measurement
     measure();
@@ -46,6 +53,10 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
       window.removeEventListener('resize', measure);
     };
   }, []);
+
+  useEffect(() => {
+    measureRef.current();
+  }, [state, history, size]);
 
   const cellPx = Math.floor(pixelSize / size);
   const totalPx = cellPx * size;

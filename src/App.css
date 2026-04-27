@@ -356,6 +356,10 @@ ion-content.sk-game-content::part(scroll) {
   backdrop-filter: none;
 }
 
+.sk-tab-section.sk-game-stage {
+  max-width: 760px;
+}
+
 .sk-game-stage .sk-game-header,
 .sk-game-stage .sk-turn-timer,
 .sk-game-stage .sk-game-controls {
@@ -441,5 +445,15 @@ ion-content.sk-game-content::part(scroll) {
 
   .sk-game-stage .sk-game-controls {
     padding: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .sk-tab-section.sk-game-stage {
+    max-width: 900px;
+  }
+
+  .sk-grid-wrapper {
+    padding: 10px;
   }
 }
