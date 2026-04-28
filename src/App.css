@@ -489,7 +489,7 @@ ion-content.sk-game-content::part(scroll) {
 
 .sk-game-stage .sk-game-header {
   padding: 0;
-  margin-top: 2px;
+  margin-top: 12px;
   margin-bottom: 2px;
 }
 
@@ -510,6 +510,26 @@ ion-content.sk-game-content::part(scroll) {
 }
 
 @media (max-width: 640px) {
+  .sk-status-desktop {
+    display: none;
+  }
+
+  .sk-status-mobile {
+    display: block;
+    margin-top: 6px;
+    margin-bottom: calc(env(safe-area-inset-bottom) + 4px);
+    text-align: center;
+    width: fit-content;
+    max-width: min(100%, 320px);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 6px 12px;
+    border: 1px solid var(--sk-cell-border);
+    border-radius: 10px;
+    background: var(--sk-dialog-bg);
+    font-weight: 700;
+  }
+
   .sk-tab-section {
     max-width: 100%;
 

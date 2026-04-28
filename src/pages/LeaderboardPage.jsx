@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 import {
   IonPage,
   IonContent,
-  IonLabel,
   IonSpinner
 } from '@ionic/react';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import { useI18n } from '../contexts/I18nContext';
 import { db } from '../firebase';
+import { getEmailLocalPart } from '../utils/emailDisplay';
 
-function Table({ rows, t, empty, keyFn, renderName, renderRating }) {
+function Table({ rows, t, empty, keyFn, renderName, renderRating, onRowClick }) {
   if (!rows || rows.length === 0) {
     return <p style={{ textAlign: 'center', marginTop: 24 }}>{empty}</p>;
   }
@@ -26,7 +26,12 @@ function Table({ rows, t, empty, keyFn, renderName, renderRating }) {
       </thead>
       <tbody>
         {rows.map((p, i) => (
-          <tr key={keyFn(p)} className={i < 3 ? `sk-top-${i + 1}` : ''}>
+          <tr
+            key={keyFn(p)}
+            className={i < 3 ? `sk-top-${i + 1}` : ''}
+            onClick={() => onRowClick && onRowClick(p)}
+            style={{ cursor: onRowClick ? 'pointer' : 'default' }}
+          >
             <td className="sk-rank-cell">{i + 1}</td>
             <td className="sk-name-cell">{renderName(p)}</td>
             <td className="sk-rating-cell">{renderRating(p)}</td>
@@ -45,6 +50,7 @@ export default function LeaderboardPage() {
   const [onlinePlayers, setOnlinePlayers] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedPlayerEmail, setSelectedPlayerEmail] = useState('');
 
   useEffect(() => {
     if (onlinePlayers !== null) return;
@@ -89,9 +95,17 @@ export default function LeaderboardPage() {
                 rows={onlinePlayers}
                 t={t}
                 empty={t('leaderboard.empty_online')}
-                keyFn={(p) => p.displayName || Math.random()}
-                renderName={(p) => p.displayName}
+                keyFn={(p) => p.email || p.displayName || Math.random()}
+                renderName={(p) => {
+                  const isSelected = selectedPlayerEmail && p.email === selectedPlayerEmail;
+                  const displayName = p.displayName || p.email;
+                  return isSelected && p.email ? getEmailLocalPart(p.email) : displayName;
+                }}
                 renderRating={(p) => p.rating}
+                onRowClick={(p) => {
+                  const email = p.email || '';
+                  setSelectedPlayerEmail((current) => (current === email ? '' : email));
+                }}
               />
             )}
           </div>

@@ -17,6 +17,10 @@ import {
 
 const AuthContext = createContext(null);
 
+function isAllowedEmail(email) {
+  return typeof email === 'string' && email.toLowerCase().endsWith('@gmail.com');
+}
+
 async function ensurePlayerProfile(user) {
   const ref = doc(db, 'players', user.uid);
   const snap = await getDoc(ref);
@@ -64,8 +68,21 @@ export function AuthProvider({ children }) {
     });
 
     const unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
       setLoading(false);
+      if (u && !isAllowedEmail(u.email)) {
+        setUser(null);
+        setError('Only @gmail.com accounts can sign in.');
+        try {
+          await fbSignOut(auth);
+        } catch (e) {
+          console.warn('Blocked account sign-out failed:', e);
+        }
+        return;
+      }
+
+      setUser(u);
+      setError(null);
+
       if (u) {
         try {
           await ensurePlayerProfile(u);
@@ -98,7 +115,11 @@ export function AuthProvider({ children }) {
   const signIn = useCallback(async () => {
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const credential = await signInWithPopup(auth, googleProvider);
+      if (!isAllowedEmail(credential.user?.email)) {
+        await fbSignOut(auth);
+        setError('Only @gmail.com accounts can sign in.');
+      }
     } catch (e) {
       if (
         e?.code === 'auth/popup-blocked' ||

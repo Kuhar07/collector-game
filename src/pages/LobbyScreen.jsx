@@ -13,7 +13,6 @@ import {
 } from '@ionic/react';
 import {
   gameControllerOutline,
-  trophyOutline,
   enterOutline,
   trophySharp,
   addCircleOutline,
@@ -25,6 +24,7 @@ import AppHeader from '../components/AppHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import { db } from '../firebase';
+import { getEmailLocalPart } from '../utils/emailDisplay';
 
 function generateGameCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -104,13 +104,15 @@ export default function LobbyScreen() {
     setShowEmail(!showEmail);
   };
 
+  const userLabel = showEmail ? getEmailLocalPart(user.email) : (user.displayName || user.email);
+
   return (
     <IonPage>
       <AppHeader title={t('app_title')} />
       <IonContent fullscreen>
         <div className="sk-menu-content">
-          <div className="sk-user-bar" title={user.email} onClick={handleUserBarClick}>
-            {showEmail ? user.email : (user.displayName || user.email)}
+          <div className="sk-user-bar" title={getEmailLocalPart(user.email)} onClick={handleUserBarClick}>
+            {userLabel}
           </div>
 
           {!mode && (
@@ -130,14 +132,6 @@ export default function LobbyScreen() {
               >
                 <IonIcon slot="start" icon={trophySharp} />
                 {t('lobby.create_ranked')}
-              </IonButton>
-              <IonButton
-                className="sk-menu-btn"
-                expand="block"
-                onClick={() => history.push('/leaderboard')}
-              >
-                <IonIcon slot="start" icon={trophyOutline} />
-                {t('lobby.online_leaderboard')}
               </IonButton>
               <IonButton
                 fill="outline"

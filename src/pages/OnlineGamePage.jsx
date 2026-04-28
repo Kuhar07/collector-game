@@ -70,7 +70,7 @@ export default function OnlineGamePage() {
     data?.status === 'active' && data.currentPlayer === myPlayerNumber;
 
   const seconds = useGameTimer({
-    enabled: !!data && data.status === 'active' && !!data.timerEnabled && isMyTurn,
+    enabled: !!data && data.status === 'active' && !!data.timerEnabled,
     turnKey,
     onTimeout
   });
@@ -161,7 +161,7 @@ export default function OnlineGamePage() {
             </div>
           </div>
 
-          {data.timerEnabled && data.status === 'active' && isMyTurn && (
+          {data.timerEnabled && data.status === 'active' && (
             <div className={`sk-turn-timer${seconds <= 10 ? ' warning' : ''}`}>
               {seconds}
             </div>
