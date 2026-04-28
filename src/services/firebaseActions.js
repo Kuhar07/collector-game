@@ -73,6 +73,10 @@ export async function cancelMatchmaking({ userId }) {
   return callBackend('/matchmaking/cancel', { userId });
 }
 
+export async function heartbeatMatchmaking({ mode }) {
+  return callBackend('/matchmaking/heartbeat', { mode });
+}
+
 export async function validateGame({ gameId }) {
   return callBackend('/game/validate', { gameId });
 }

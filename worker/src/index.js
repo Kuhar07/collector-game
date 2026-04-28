@@ -18,10 +18,21 @@ const DISPLAY_DIVISOR = 2485;
 const MIN_SIGMA = 1;
 const EPSILON = 1e-12;
 const MATCHMAKING_STALE_MS_BY_MODE = {
-  ranked: 15 * 1000,
-  casual: 90 * 1000
+  ranked: 25 * 1000,
+  casual: 30 * 1000
 };
 const MATCHMAKING_STALE_MS = 30 * 1000;
+
+const RANKED_BAND_INITIAL = 100;
+const RANKED_BAND_STEP = 100;
+const RANKED_BAND_INTERVAL_MS = 5 * 1000;
+const RANKED_BAND_MAX = 800;
+
+function ratingBandForMode(mode, waitMs) {
+  if (mode !== 'ranked') return Number.POSITIVE_INFINITY;
+  const intervals = Math.floor(Math.max(0, waitMs) / RANKED_BAND_INTERVAL_MS);
+  return Math.min(RANKED_BAND_MAX, RANKED_BAND_INITIAL + RANKED_BAND_STEP * intervals);
+}
 
 let certCache = null;
 let certCacheExpiresAt = 0;
@@ -622,22 +633,36 @@ function getRequestJson(request) {
   return request.json().catch(() => ({}));
 }
 
-async function queryQueueDocs(env, mode) {
+async function queryQueueDocs(env, mode, extraFilters = {}) {
   const collectionId = matchmakingCollection(mode);
+  const filters = [
+    { fieldFilter: { field: { fieldPath: 'mode' }, op: 'EQUAL', value: { stringValue: mode } } },
+    { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'searching' } } }
+  ];
+  if (Number.isFinite(Number(extraFilters.gridSize))) {
+    filters.push({
+      fieldFilter: {
+        field: { fieldPath: 'gridSize' },
+        op: 'EQUAL',
+        value: { integerValue: String(Number(extraFilters.gridSize)) }
+      }
+    });
+  }
+  if (typeof extraFilters.timerEnabled === 'boolean') {
+    filters.push({
+      fieldFilter: {
+        field: { fieldPath: 'timerEnabled' },
+        op: 'EQUAL',
+        value: { booleanValue: extraFilters.timerEnabled }
+      }
+    });
+  }
   const response = await firestoreFetch(env, ':runQuery', {
     method: 'POST',
     body: JSON.stringify({
       structuredQuery: {
         from: [{ collectionId }],
-        where: {
-          compositeFilter: {
-            op: 'AND',
-            filters: [
-              { fieldFilter: { field: { fieldPath: 'mode' }, op: 'EQUAL', value: { stringValue: mode } } },
-              { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'searching' } } }
-            ]
-          }
-        }
+        where: { compositeFilter: { op: 'AND', filters } }
       }
     })
   });
@@ -781,15 +806,40 @@ async function handleMatchmakingAction(env, authUser, body) {
     return corsResponse({ ok: true });
   }
 
+  if (action === 'heartbeat') {
+    const queue = await getDocument(env, queueCollection, authUser.uid);
+    if (!queue) return corsResponse({ ok: true, alive: false });
+    if (queue.data.status !== 'searching') {
+      return corsResponse({ ok: true, alive: false, status: queue.data.status, gameId: queue.data.gameId || null });
+    }
+    await writeDocument(env, queueCollection, authUser.uid, {
+      ...queue.data,
+      updatedAtMs: Date.now(),
+      updatedAt: new Date().toISOString()
+    }, queue.updateTime);
+    return corsResponse({ ok: true, alive: true });
+  }
+
   if (action === 'run') {
     const queue = await getDocument(env, queueCollection, authUser.uid);
     if (!queue) return corsResponse({ ok: true, gameId: null });
     const self = queue.data;
     if (self.status !== 'searching') return corsResponse({ ok: true, gameId: null });
 
-    const candidates = await queryQueueDocs(env, mode);
+    const candidates = await queryQueueDocs(
+      env,
+      mode,
+      mode === 'casual'
+        ? { gridSize: Number(self.gridSize) || 6, timerEnabled: !!self.timerEnabled }
+        : {}
+    );
     const others = candidates.filter((entry) => entry.id !== authUser.uid);
     if (!others.length) return corsResponse({ ok: true, gameId: null });
+
+    const now = Date.now();
+    const selfDisplayRating = Number(self.rating || DEFAULT_DISPLAY_RATING);
+    const selfJoinedAtMs = Number(self.joinedAtMs) || now;
+    const selfBand = ratingBandForMode(mode, now - selfJoinedAtMs);
 
     const liveCandidates = [];
     for (const entry of others) {
@@ -797,17 +847,7 @@ async function handleMatchmakingAction(env, authUser, body) {
         await writeDocument(env, queueCollection, entry.id, {
           ...entry.data,
           status: 'stale',
-          updatedAtMs: Date.now(),
-          updatedAt: new Date().toISOString()
-        });
-        continue;
-      }
-      const playerDoc = await getDocument(env, 'players', entry.id);
-      if (!playerDoc || playerDoc.data?.state !== 'searching') {
-        await writeDocument(env, queueCollection, entry.id, {
-          ...entry.data,
-          status: 'stale',
-          updatedAtMs: Date.now(),
+          updatedAtMs: now,
           updatedAt: new Date().toISOString()
         });
         continue;
@@ -815,10 +855,14 @@ async function handleMatchmakingAction(env, authUser, body) {
       if (entry.data?.status !== 'searching' || entry.data?.matchedWith || entry.data?.gameId) {
         continue;
       }
+      const candRating = Number(entry.data.rating || DEFAULT_DISPLAY_RATING);
+      const candJoinedAtMs = Number(entry.data.joinedAtMs) || now;
+      const candBand = ratingBandForMode(mode, now - candJoinedAtMs);
+      const allowedDiff = Math.min(selfBand, candBand);
+      if (Math.abs(candRating - selfDisplayRating) > allowedDiff) continue;
       liveCandidates.push(entry);
     }
 
-    const selfDisplayRating = Number(self.rating || DEFAULT_DISPLAY_RATING);
     const scored = liveCandidates
       .map((candidate) => ({
         candidate,
@@ -835,6 +879,12 @@ async function handleMatchmakingAction(env, authUser, body) {
     const closestDiff = Math.abs(scored[0].displayRating - selfDisplayRating);
     const tied = scored.filter((entry) => Math.abs(entry.displayRating - selfDisplayRating) === closestDiff);
     const chosen = tied[Math.floor(Math.random() * tied.length)];
+
+    // Deterministic pairing: only the lexicographically smaller UID creates the match.
+    // The other player observes their queue doc flip to `matched` via Firestore listener.
+    if (authUser.uid >= chosen.candidate.id) {
+      return corsResponse({ ok: true, gameId: null, debug: { reason: 'defer_to_lower_uid' } });
+    }
 
     const candidateQueue = await getDocument(env, queueCollection, chosen.candidate.id);
     if (!candidateQueue) return corsResponse({ ok: true, gameId: null });
@@ -1214,7 +1264,12 @@ async function handleRequest(request, env) {
     const action = url.pathname.split('/').pop();
     return handleRoomAction(env, authUser, { ...body, action });
   }
-  if (url.pathname === '/matchmaking/enqueue' || url.pathname === '/matchmaking/run' || url.pathname === '/matchmaking/cancel') {
+  if (
+    url.pathname === '/matchmaking/enqueue' ||
+    url.pathname === '/matchmaking/run' ||
+    url.pathname === '/matchmaking/cancel' ||
+    url.pathname === '/matchmaking/heartbeat'
+  ) {
     const action = url.pathname.split('/').pop();
     return handleMatchmakingAction(env, authUser, { ...body, action });
   }

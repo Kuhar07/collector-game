@@ -3,7 +3,7 @@ import {
     onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { enqueueForMatch as enqueueForMatchCall, runMatchmaker as runMatchmakerCall, cancelMatchmaking as cancelMatchmakingCall } from '../services/firebaseActions';
+import { enqueueForMatch as enqueueForMatchCall, runMatchmaker as runMatchmakerCall, cancelMatchmaking as cancelMatchmakingCall, heartbeatMatchmaking as heartbeatMatchmakingCall } from '../services/firebaseActions';
 import { validateGame as validateGameCall } from '../services/firebaseActions';
 
 function queueCollectionForMode(mode) {
@@ -32,4 +32,8 @@ export async function validateGame({ gameId }) {
 
 export async function cancelMatchmaking(userId, mode) {
     await cancelMatchmakingCall({ userId, mode });
+}
+
+export async function heartbeatMatchmaking(mode) {
+    return heartbeatMatchmakingCall({ mode });
 }

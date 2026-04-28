@@ -15,7 +15,8 @@ import {
     enqueueForMatch,
     listenForMatch,
     tryFindMatch,
-    cancelMatchmaking
+    cancelMatchmaking,
+    heartbeatMatchmaking
 } from '../hooks/matchmakingService';
 import { validateGame } from '../hooks/matchmakingService';
 
@@ -51,6 +52,7 @@ export default function MatchmakingQueuePage() {
         let trying = false;
         let unsubscribe = () => { };
         let retryTimer = null;
+        let heartbeatTimer = null;
         let lastRedirectedGameId = null; // Track to avoid redirecting twice to same game
 
         const attemptMatch = async () => {
@@ -108,6 +110,12 @@ export default function MatchmakingQueuePage() {
                 retryTimer = window.setInterval(() => {
                     void attemptMatch();
                 }, 3000);
+
+                // Heartbeat keeps the queue entry alive so it isn't pruned as stale.
+                heartbeatTimer = window.setInterval(() => {
+                    if (!active) return;
+                    void heartbeatMatchmaking(safeMode).catch(() => { });
+                }, 10000);
             } catch (e) {
                 if (active) setError(e.message || t('lobby.matchmaking_error'));
             }
@@ -119,6 +127,7 @@ export default function MatchmakingQueuePage() {
             active = false;
             unsubscribe();
             if (retryTimer) window.clearInterval(retryTimer);
+            if (heartbeatTimer) window.clearInterval(heartbeatTimer);
         };
     }, [
         user,
