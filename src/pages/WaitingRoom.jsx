@@ -8,11 +8,10 @@ import {
   IonSpinner
 } from '@ionic/react';
 import { closeCircleOutline } from 'ionicons/icons';
-import { doc, updateDoc } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import { useI18n } from '../contexts/I18nContext';
 import { useFirestoreGame } from '../hooks/useFirestoreGame';
-import { db } from '../firebase';
+import { cancelCasualRoom } from '../services/firebaseActions';
 
 export default function WaitingRoom() {
   const { t } = useI18n();
@@ -33,7 +32,7 @@ export default function WaitingRoom() {
 
   const cancel = async () => {
     try {
-      await updateDoc(doc(db, 'games', gameId), { status: 'cancelled' });
+      await cancelCasualRoom({ code });
     } catch (_) {}
     history.replace('/online/lobby');
   };

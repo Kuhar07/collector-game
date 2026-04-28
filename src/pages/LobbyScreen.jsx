@@ -19,12 +19,11 @@ import {
   flashOutline,
   logOutOutline
 } from 'ionicons/icons';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { db } from '../firebase';
 import { getEmailLocalPart } from '../utils/emailDisplay';
+import { createCasualRoom } from '../services/firebaseActions';
 
 function generateGameCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -54,31 +53,11 @@ export default function LobbyScreen() {
     const size = gridSize;
     const timerEnabled = timer;
     const code = generateGameCode();
-    const gameId = 'game_' + code;
 
     setCreating(true);
     setError('');
     try {
-      await setDoc(doc(db, 'games', gameId), {
-        gameCode: code,
-        mode: 'casual',
-        source: 'room',
-        status: 'waiting',
-        player1uid: user.uid,
-        player1name: user.displayName || user.email,
-        player2uid: null,
-        player2name: null,
-        gridSize: size,
-        timerEnabled,
-        currentPlayer: 1,
-        phase: 'place',
-        lastPlaces: null,
-        gameStateJSON: null,
-        placementHistory: { p1: [], p2: [] },
-        timeouts: { p1: 0, p2: 0 },
-        result: null,
-        createdAt: serverTimestamp()
-      });
+      await createCasualRoom({ code, gridSize: size, timerEnabled });
       history.push(`/online/waiting/${code}`);
     } catch (e) {
       setError(e.message);

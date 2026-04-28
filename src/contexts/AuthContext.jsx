@@ -6,60 +6,13 @@ import {
   getRedirectResult,
   signOut as fbSignOut
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../firebase';
-import {
-  DEFAULT_DISPLAY_RATING,
-  DEFAULT_MU,
-  DEFAULT_SIGMA,
-  normalizeSkillProfile
-} from '../game/skillRating';
+import { auth, googleProvider } from '../firebase';
+import { ensurePlayerProfile } from '../services/firebaseActions';
 
 const AuthContext = createContext(null);
 
 function isAllowedEmail(email) {
   return typeof email === 'string' && email.toLowerCase().endsWith('@gmail.com');
-}
-
-async function ensurePlayerProfile(user) {
-  // Only allow gmail accounts to have profiles
-  if (!isAllowedEmail(user.email)) {
-    throw new Error('Only @gmail.com accounts can create profiles.');
-  }
-
-  const ref = doc(db, 'players', user.uid);
-  const snap = await getDoc(ref);
-  const existing = snap.data() || {};
-  const normalized = normalizeSkillProfile(existing);
-
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      displayName: user.displayName || user.email,
-      email: user.email,
-      mu: DEFAULT_MU,
-      sigma: DEFAULT_SIGMA,
-      rating: DEFAULT_DISPLAY_RATING,
-      games: 0,
-      wins: 0,
-      losses: 0,
-      draws: 0,
-      updatedAt: serverTimestamp()
-    });
-    return;
-  }
-
-  if (existing.mu == null || existing.sigma == null || existing.rating == null) {
-    await setDoc(
-      ref,
-      {
-        displayName: existing.displayName || user.displayName || user.email,
-        email: existing.email || user.email,
-        ...normalized,
-        updatedAt: serverTimestamp()
-      },
-      { merge: true }
-    );
-  }
 }
 
 export function AuthProvider({ children }) {
@@ -97,7 +50,7 @@ export function AuthProvider({ children }) {
 
       if (u) {
         try {
-          await ensurePlayerProfile(u);
+          await ensurePlayerProfile();
         } catch (e) {
           console.warn('Profile init failed:', e);
         }

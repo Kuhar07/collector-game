@@ -10,11 +10,10 @@ import {
   IonInput
 } from '@ionic/react';
 import { enterOutline, arrowBackOutline } from 'ionicons/icons';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { db } from '../firebase';
+import { joinCasualRoom } from '../services/firebaseActions';
 
 export default function JoinRoomForm() {
   const { t } = useI18n();
@@ -36,26 +35,12 @@ export default function JoinRoomForm() {
     }
     setError('');
     setJoining(true);
-    const gameId = 'game_' + clean;
     try {
-      const snap = await getDoc(doc(db, 'games', gameId));
-      if (!snap.exists() || snap.data().status !== 'waiting') {
-        setError(t('notifications.room_not_found'));
-        return;
-      }
-      const gameData = snap.data();
-      if (gameData.mode !== 'casual' || gameData.source !== 'room') {
-        setError(t('notifications.room_not_found'));
-        return;
-      }
-      await updateDoc(doc(db, 'games', gameId), {
-        player2uid: user.uid,
-        player2name: user.displayName || user.email,
-        status: 'active'
-      });
+      const result = await joinCasualRoom({ code: clean });
+      const gameId = result?.data?.gameId || 'game_' + clean;
       history.replace(`/online/game/${gameId}`);
     } catch (e) {
-      setError(e.message);
+      setError(e?.message || t('notifications.room_not_found'));
     } finally {
       setJoining(false);
     }

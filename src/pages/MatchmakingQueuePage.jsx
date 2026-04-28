@@ -17,6 +17,7 @@ import {
     tryFindMatch,
     cancelMatchmaking
 } from '../hooks/matchmakingService';
+import { validateGame } from '../hooks/matchmakingService';
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -50,14 +51,17 @@ export default function MatchmakingQueuePage() {
         let trying = false;
         let unsubscribe = () => { };
         let retryTimer = null;
+        let lastRedirectedGameId = null; // Track to avoid redirecting twice to same game
 
         const attemptMatch = async () => {
-            if (!active || trying) return;
+            if (trying) return;
             trying = true;
             try {
                 const gameId = await tryFindMatch({ userId: user.uid, mode: safeMode });
                 if (active && gameId) {
-                    history.replace(`/online/game/${gameId}`);
+                    // validate backend that this user is actually a participant in the game
+                    const ok = await validateGame({ gameId });
+                    if (ok) history.replace(`/online/game/${gameId}`);
                 }
             } catch (_) {
                 // Keep searching; transient failures should not stop queue retries.
@@ -69,6 +73,11 @@ export default function MatchmakingQueuePage() {
         const start = async () => {
             try {
                 const isRanked = safeMode === 'ranked';
+                // Always cancel any previous matchmaking to clear stale queue state
+                await cancelMatchmaking(user.uid, safeMode);
+                // Wait a moment for deletion to propagate through Firestore
+                await new Promise((resolve) => setTimeout(resolve, 500));
+
                 await enqueueForMatch({
                     user,
                     mode: safeMode,
@@ -76,10 +85,20 @@ export default function MatchmakingQueuePage() {
                     timerEnabled: isRanked ? true : casualTimerEnabled
                 });
 
-                unsubscribe = listenForMatch(user.uid, (queueEntry) => {
+                unsubscribe = listenForMatch(user.uid, safeMode, async (queueEntry) => {
                     if (!active || !queueEntry) return;
                     if (queueEntry.status === 'matched' && queueEntry.gameId) {
-                        history.replace(`/online/game/${queueEntry.gameId}`);
+                        // Avoid redirecting to same game twice (prevents listener from firing on cached state)
+                        if (queueEntry.gameId !== lastRedirectedGameId) {
+                            lastRedirectedGameId = queueEntry.gameId;
+                            // validate before navigating
+                            try {
+                                const ok = await validateGame({ gameId: queueEntry.gameId });
+                                if (ok) history.replace(`/online/game/${queueEntry.gameId}`);
+                            } catch (e) {
+                                // ignore invalid or transient errors
+                            }
+                        }
                     }
                 });
 
@@ -117,7 +136,7 @@ export default function MatchmakingQueuePage() {
         }
         setCancelling(true);
         try {
-            await cancelMatchmaking(user.uid);
+            await cancelMatchmaking(user.uid, safeMode);
         } catch (_) {
             // Ignore cancellation errors and return to lobby.
         } finally {

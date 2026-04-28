@@ -25,13 +25,9 @@ service cloud.firestore {
 
     match /players/{userId} {
       // Allow public reads for the leaderboard (no auth required).
-      // Note: player documents include displayName and rating; if you
-      // store sensitive fields (emails, etc.) consider removing them
-      // from the public documents or restricting read access.
       allow read: if true;
-      // Spark version: client-side ranked updates may touch both player docs.
-      allow create, update: if isSignedIn();
-      allow delete: if false;
+      // Player docs are now written by Firebase Functions only.
+      allow create, update, delete: if false;
     }
 
     match /games/{gameId} {
@@ -43,70 +39,18 @@ service cloud.firestore {
           && resource.data.status == 'waiting'
         );
 
-      // Casual room creation by the owner.
-      allow create: if isSignedIn()
-        && (
-          (
-            request.resource.data.mode == 'casual'
-            && request.resource.data.source == 'room'
-            && request.resource.data.status == 'waiting'
-            && request.resource.data.player1uid == request.auth.uid
-            && request.resource.data.player2uid == null
-          )
-          ||
-          (
-            request.resource.data.source == 'matchmaking'
-            && request.resource.data.status == 'active'
-            && request.resource.data.gameCode == null
-            && request.resource.data.player1uid != null
-            && request.resource.data.player2uid != null
-            && (
-              request.auth.uid == request.resource.data.player1uid
-              || request.auth.uid == request.resource.data.player2uid
-            )
-          )
-        );
-
-      // Allow joining waiting casual room by claiming player2 slot.
-      allow update: if isSignedIn() && (
-        (
-          resource.data.mode == 'casual'
-          && resource.data.source == 'room'
-          && resource.data.status == 'waiting'
-          && resource.data.player2uid == null
-          && request.resource.data.player2uid == request.auth.uid
-          && request.resource.data.status == 'active'
-          && request.resource.data.player1uid == resource.data.player1uid
-          && request.resource.data.mode == resource.data.mode
-          && request.resource.data.source == resource.data.source
-          && request.resource.data.gridSize == resource.data.gridSize
-          && request.resource.data.timerEnabled == resource.data.timerEnabled
-          && request.resource.data.createdAt == resource.data.createdAt
-        )
-        ||
-        (
-          isPlayerInGame(resource.data)
-          && gameCoreFieldsUnchanged()
-        )
-      );
-
-      allow delete: if false;
+      // All game mutations are handled by Firebase Functions.
+      allow create, update, delete: if false;
     }
 
-    // Spark version queue: client-side matching with transactional updates.
-    match /matchmakingQueue/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && (
-        request.auth.uid == userId
-        || (
-          resource.data.status == 'searching'
-          && request.resource.data.status == 'matched'
-          && request.resource.data.matchedWith == request.auth.uid
-          && request.resource.data.gameId is string
-        )
-      );
-      allow delete: if false;
+    match /matchmakingQueue_ranked/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+    }
+
+    match /matchmakingQueue_casual/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
     }
   }
 }

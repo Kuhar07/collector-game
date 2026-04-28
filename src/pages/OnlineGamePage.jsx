@@ -12,13 +12,16 @@ import { homeOutline } from 'ionicons/icons';
 import AppHeader from '../components/AppHeader';
 import GameBoard from '../components/GameBoard';
 import { useI18n } from '../contexts/I18nContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useOnlineGame } from '../hooks/useOnlineGame';
 import { useGameTimer } from '../hooks/useGameTimer';
 import { formatDelta } from '../game/gameEngine';
+import { notifyGameJoin } from '../services/firebaseActions';
 
 export default function OnlineGamePage() {
   const { t, lang } = useI18n();
   const { id } = useParams();
+  const { user } = useAuth();
   const history = useHistory();
   const {
     data,
@@ -42,7 +45,24 @@ export default function OnlineGamePage() {
 
   useEffect(() => {
     if (exists === false) history.replace('/online/lobby');
-  }, [exists, history]);
+    // If user is not a player in this game, go back to lobby
+    if (exists === true && data && myPlayerNumber === null) {
+      history.replace('/online/lobby');
+    }
+  }, [exists, history, data, myPlayerNumber]);
+
+  // Notify backend when player joins the game
+  useEffect(() => {
+    if (!user || !exists || !id) return;
+    const notifyJoin = async () => {
+      try {
+        await notifyGameJoin({ gameId: id });
+      } catch (error) {
+        console.error('Failed to notify game join:', error);
+      }
+    };
+    notifyJoin();
+  }, [user, exists, id]);
 
   useEffect(() => {
     if (!data) return;
