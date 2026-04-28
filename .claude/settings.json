@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/diagnose_matchmaking_multi.cjs)"
+    ]
+  }
+}

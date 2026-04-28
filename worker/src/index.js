@@ -982,6 +982,17 @@ async function handleMatchmakingAction(env, authUser, body) {
   return errorResponse('Unknown matchmaking action.', 400);
 }
 
+async function finalizeMatchCleanup(env, game) {
+  if (!game) return;
+  const mode = normalizeMode(game.mode);
+  const queueCollection = matchmakingCollection(mode);
+  const uids = [game.player1uid, game.player2uid].filter(Boolean);
+  await Promise.all(uids.map(async (uid) => {
+    try { await deleteDocument(env, queueCollection, uid); } catch (_) {}
+    try { await setPlayerState(env, uid, 'idle'); } catch (_) {}
+  }));
+}
+
 async function handleGameValidate(env, authUser, body) {
   const gameId = String(body.gameId || '');
   if (!gameId) return errorResponse('gameId is required.', 400);
@@ -1074,6 +1085,7 @@ async function handleGameAction(env, authUser, body) {
         update.phase = 'place';
       }
       await writeDocument(env, 'games', gameId, update);
+      if (result) await finalizeMatchCleanup(env, update);
       return corsResponse({ ok: true });
     }
 
@@ -1102,12 +1114,14 @@ async function handleGameAction(env, authUser, body) {
       const s1 = getBiggestGroup(state, size, 1);
       const s2 = getBiggestGroup(state, size, 2);
       const winner = playerNumber === 1 ? 2 : 1;
-      await writeDocument(env, 'games', gameId, {
+      const finishedGame = {
         ...current,
         status: 'finished',
         result: { winner, score1: s1, score2: s2, timeout: true, loser: playerNumber },
         timeouts: { ...timeouts, [myKey]: newCount }
-      });
+      };
+      await writeDocument(env, 'games', gameId, finishedGame);
+      await finalizeMatchCleanup(env, finishedGame);
       return corsResponse({ ok: true });
     }
 
@@ -1152,14 +1166,13 @@ async function handleGameAction(env, authUser, body) {
       }, myProfileDoc?.updateTime);
     }
 
-    await writeDocument(env, 'games', gameId, {
+    const leftGame = {
       ...current,
       status: 'left',
       leftBy: authUser.uid
-    });
-
-    // Set player state back to idle when leaving
-    await setPlayerState(env, authUser.uid, 'idle');
+    };
+    await writeDocument(env, 'games', gameId, leftGame);
+    await finalizeMatchCleanup(env, leftGame);
     return corsResponse({ ok: true });
   }
 
