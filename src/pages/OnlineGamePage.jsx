@@ -145,7 +145,7 @@ export default function OnlineGamePage() {
             <div className={`sk-player-info${data.currentPlayer === 1 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#dc3545' }}>
                 {data.player1name}
-                {isRanked ? ` (${ratings[1]})` : ''}
+                {isRanked ? ` (${Math.round(ratings[1])})` : ''}
               </div>
               <div className="sk-player-score">{scores[1]}</div>
             </div>
@@ -155,7 +155,7 @@ export default function OnlineGamePage() {
             <div className={`sk-player-info${data.currentPlayer === 2 ? ' active' : ''}`}>
               <div className="sk-player-name" style={{ color: '#007bff' }}>
                 {data.player2name || '—'}
-                {isRanked ? ` (${ratings[2]})` : ''}
+                {isRanked ? ` (${Math.round(ratings[2])})` : ''}
               </div>
               <div className="sk-player-score">{scores[2]}</div>
             </div>

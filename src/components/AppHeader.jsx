@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IonHeader,
   IonToolbar,
@@ -21,6 +21,13 @@ export default function AppHeader({ title }) {
   const { t, lang, toggleLang } = useI18n();
   const { isDark, toggleTheme } = useTheme();
   const [rulesOpen, setRulesOpen] = useState(false);
+
+  // Close rules modal when auth state changes (prevents leftover overlays after redirect signin)
+  useEffect(() => {
+    const handler = () => setRulesOpen(false);
+    window.addEventListener('auth-changed', handler);
+    return () => window.removeEventListener('auth-changed', handler);
+  }, []);
 
   return (
     <>

@@ -27,14 +27,6 @@ export default function AuthScreen() {
               <IonIcon slot="start" icon={logoGoogle} />
               {t('auth.sign_in_google')}
             </IonButton>
-            <IonButton
-              fill="outline"
-              expand="block"
-              onClick={() => history.replace('/offline')}
-            >
-              <IonIcon slot="start" icon={arrowBackOutline} />
-              {t('auth.cancel')}
-            </IonButton>
           </div>
           {error && (
             <p style={{ color: '#dc3545', marginTop: 16, textAlign: 'center' }}>{error}</p>

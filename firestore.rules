@@ -24,7 +24,11 @@ service cloud.firestore {
     }
 
     match /players/{userId} {
-      allow read: if isSignedIn();
+      // Allow public reads for the leaderboard (no auth required).
+      // Note: player documents include displayName and rating; if you
+      // store sensitive fields (emails, etc.) consider removing them
+      // from the public documents or restricting read access.
+      allow read: if true;
       // Spark version: client-side ranked updates may touch both player docs.
       allow create, update: if isSignedIn();
       allow delete: if false;

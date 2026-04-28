@@ -64,7 +64,11 @@ export function getConservativeSkillEstimate(mu, sigma) {
 
 export function getDisplayRatingFromProfile(profile = {}) {
     if (Number.isFinite(Number(profile.mu)) && Number.isFinite(Number(profile.sigma))) {
-        return displayRatingFromConservativeSkill(getConservativeSkillEstimate(profile.mu, profile.sigma));
+        return Math.round(
+            displayRatingFromConservativeSkill(
+                getConservativeSkillEstimate(profile.mu, profile.sigma)
+            )
+        );
     }
 
     const legacyRating = Number(profile.rating);

@@ -73,6 +73,24 @@ export function AuthProvider({ children }) {
           console.warn('Profile init failed:', e);
         }
       }
+      try {
+        // notify other components that auth state changed so they can close overlays
+        window.dispatchEvent(new Event('auth-changed'));
+        // If we returned from an auth redirect flow, force a reload to ensure UI state updates
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          const redirected = window.sessionStorage.getItem('authRedirect');
+          if (redirected) {
+            window.sessionStorage.removeItem('authRedirect');
+            try {
+              window.location.reload();
+            } catch (e) {
+              console.warn('Reload after redirect failed:', e);
+            }
+          }
+        }
+      } catch (e) {
+        // ignore in non-browser environments
+      }
     });
     return unsub;
   }, []);
@@ -88,6 +106,12 @@ export function AuthProvider({ children }) {
         e?.code === 'auth/popup-closed-by-user'
       ) {
         try {
+          // mark that we're redirecting so we can reload after returning
+          try {
+            sessionStorage.setItem('authRedirect', '1');
+          } catch (err) {
+            /* ignore if sessionStorage unavailable */
+          }
           await signInWithRedirect(auth, googleProvider);
         } catch (e2) {
           setError(e2.message);

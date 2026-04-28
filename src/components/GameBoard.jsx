@@ -7,7 +7,7 @@ const P2_COLOR = '#007bff';
 const MIN_BOARD_MOBILE = 220;
 const MIN_BOARD_DESKTOP = 180;
 const MAX_BOARD_MOBILE = 430;
-const MAX_BOARD_DESKTOP = 760;
+const MAX_BOARD_DESKTOP = 400;
 const DESKTOP_BREAKPOINT = 900;
 
 export default function GameBoard({ state, size, history, onCellClick, disabled }) {
@@ -19,7 +19,7 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
     const measure = () => {
       if (!wrapperRef.current) return;
       const stage = wrapperRef.current.parentElement;
-      const containerWidth = stage?.clientWidth || wrapperRef.current.clientWidth;
+      const containerWidth = wrapperRef.current.clientWidth || stage?.clientWidth || 0;
       const width = Math.floor(containerWidth) - 2;
       const isDesktop = window.innerWidth >= DESKTOP_BREAKPOINT;
       const mobileTarget = Math.floor(window.innerWidth * 0.9);
@@ -28,18 +28,24 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
         : Math.min(MAX_BOARD_MOBILE, Math.max(MIN_BOARD_MOBILE, mobileTarget));
       const minBoard = isDesktop ? MIN_BOARD_DESKTOP : MIN_BOARD_MOBILE;
 
-      const wrapperRect = wrapperRef.current.getBoundingClientRect();
-      const controlsHeight = stage?.querySelector('.sk-game-controls')?.getBoundingClientRect().height || 0;
-      const mobileStatusHeight = stage?.querySelector('.sk-status-mobile')?.getBoundingClientRect().height || 0;
-      const tabBarHeight = document.querySelector('ion-tab-bar')?.getBoundingClientRect().height || 0;
-      const layoutReserve = window.innerWidth >= 641 ? 24 : 14;
-      const bottomReserve = controlsHeight + mobileStatusHeight + tabBarHeight + layoutReserve;
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-      const availableHeight = Math.max(
-        minBoard,
-        Math.floor(viewportHeight - wrapperRect.top - bottomReserve)
-      );
-      const calculated = Math.min(maxBoard, Math.max(minBoard, Math.min(width, availableHeight)));
+      let calculated;
+      if (isDesktop) {
+        // Keep desktop board stable: size from width only so the controls below remain visible.
+        calculated = Math.min(maxBoard, Math.max(minBoard, width));
+      } else {
+        const wrapperRect = wrapperRef.current.getBoundingClientRect();
+        const controlsHeight = stage?.querySelector('.sk-game-controls')?.getBoundingClientRect().height || 0;
+        const mobileStatusHeight = stage?.querySelector('.sk-status-mobile')?.getBoundingClientRect().height || 0;
+        const tabBarHeight = document.querySelector('ion-tab-bar')?.getBoundingClientRect().height || 0;
+        const layoutReserve = 14;
+        const bottomReserve = controlsHeight + mobileStatusHeight + tabBarHeight + layoutReserve;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        const availableHeight = Math.max(
+          minBoard,
+          Math.floor(viewportHeight - wrapperRect.top - bottomReserve)
+        );
+        calculated = Math.min(maxBoard, Math.max(minBoard, Math.min(width, availableHeight)));
+      }
       setPixelSize(calculated);
     };
     measureRef.current = measure;
@@ -64,7 +70,7 @@ export default function GameBoard({ state, size, history, onCellClick, disabled 
 
   useEffect(() => {
     measureRef.current();
-  }, [state, history, size]);
+  }, [size]);
 
   const cellPx = Math.floor(pixelSize / size);
   const totalPx = cellPx * size;

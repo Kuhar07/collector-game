@@ -75,9 +75,6 @@ export default function LeaderboardPage() {
       <AppHeader title={t('leaderboard.title')} />
       <IonContent fullscreen>
         <div className="sk-tab-section ion-padding">
-          <div className="sk-leaderboard-heading">
-            <IonLabel>{t('leaderboard.online_section')}</IonLabel>
-          </div>
           <div className="sk-leaderboard-container">
             {loading && (
               <div style={{ textAlign: 'center', marginTop: 24 }}>
