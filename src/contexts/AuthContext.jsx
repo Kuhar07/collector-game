@@ -22,6 +22,11 @@ function isAllowedEmail(email) {
 }
 
 async function ensurePlayerProfile(user) {
+  // Only allow gmail accounts to have profiles
+  if (!isAllowedEmail(user.email)) {
+    throw new Error('Only @gmail.com accounts can create profiles.');
+  }
+
   const ref = doc(db, 'players', user.uid);
   const snap = await getDoc(ref);
   const existing = snap.data() || {};
@@ -63,9 +68,16 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getRedirectResult(auth).catch((e) => {
-      if (e?.code !== 'auth/no-auth-event') console.warn('Redirect result error:', e);
-    });
+    getRedirectResult(auth)
+      .then((credential) => {
+        if (credential?.user && !isAllowedEmail(credential.user.email)) {
+          fbSignOut(auth);
+          setError('Only @gmail.com accounts can sign in.');
+        }
+      })
+      .catch((e) => {
+        if (e?.code !== 'auth/no-auth-event') console.warn('Redirect result error:', e);
+      });
 
     const unsub = onAuthStateChanged(auth, async (u) => {
       setLoading(false);

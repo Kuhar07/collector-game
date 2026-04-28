@@ -5,6 +5,7 @@ import {
   persistentMultipleTabManager
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyARc_n26JuSHaY7uKaXbV4uLJ9mZcs7wX4',
@@ -17,6 +18,12 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+
+// Initialize App Check with reCAPTCHA v3
+initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider('6LdLC88sAAAAAFxTsCtbLUe0tsvYTQFaTW58iBAh'),
+  isTokenAutoRefreshEnabled: true
+});
 
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })

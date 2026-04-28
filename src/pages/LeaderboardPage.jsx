@@ -10,7 +10,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { db } from '../firebase';
 import { getEmailLocalPart } from '../utils/emailDisplay';
 
-function Table({ rows, t, empty, keyFn, renderName, renderRating, onRowClick }) {
+function Table({ rows, t, empty, keyFn, renderName, renderRating, onRowClick, selectedPlayerEmail }) {
   if (!rows || rows.length === 0) {
     return <p style={{ textAlign: 'center', marginTop: 24 }}>{empty}</p>;
   }
@@ -25,21 +25,26 @@ function Table({ rows, t, empty, keyFn, renderName, renderRating, onRowClick }) 
         </tr>
       </thead>
       <tbody>
-        {rows.map((p, i) => (
-          <tr
-            key={keyFn(p)}
-            className={i < 3 ? `sk-top-${i + 1}` : ''}
-            onClick={() => onRowClick && onRowClick(p)}
-            style={{ cursor: onRowClick ? 'pointer' : 'default' }}
-          >
-            <td className="sk-rank-cell">{i + 1}</td>
-            <td className="sk-name-cell">{renderName(p)}</td>
-            <td className="sk-rating-cell">{renderRating(p)}</td>
-            <td className="sk-wdl-cell">
-              {(p.wins ?? 0)} / {(p.draws ?? 0)} / {(p.losses ?? 0)}
-            </td>
-          </tr>
-        ))}
+        {rows.map((p, i) => {
+          const isSelected = selectedPlayerEmail && p.email === selectedPlayerEmail;
+          const baseClassName = i < 3 ? `sk-top-${i + 1}` : '';
+          const className = isSelected ? `${baseClassName} sk-leaderboard-selected` : baseClassName;
+          return (
+            <tr
+              key={keyFn(p)}
+              className={className}
+              onClick={() => onRowClick && onRowClick(p)}
+              style={{ cursor: onRowClick ? 'pointer' : 'default' }}
+            >
+              <td className="sk-rank-cell">{i + 1}</td>
+              <td className="sk-name-cell">{renderName(p)}</td>
+              <td className="sk-rating-cell">{renderRating(p)}</td>
+              <td className="sk-wdl-cell">
+                {(p.wins ?? 0)} / {(p.draws ?? 0)} / {(p.losses ?? 0)}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -106,6 +111,7 @@ export default function LeaderboardPage() {
                   const email = p.email || '';
                   setSelectedPlayerEmail((current) => (current === email ? '' : email));
                 }}
+                selectedPlayerEmail={selectedPlayerEmail}
               />
             )}
           </div>
